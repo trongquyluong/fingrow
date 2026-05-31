@@ -1,0 +1,113 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --color-brand-mint: #22C55E;
+  --color-brand-green: #22C55E;
+  --color-brand-purple: #A855F7;
+  --color-brand-violet: #7C3AED;
+  --color-brand-cyan: #06B6D4;
+  --color-brand-coral: #EF4444;
+  --color-brand-amber: #F59E0B;
+  --color-brand-blue: #60A5FA;
+}
+
+:root {
+  --bg-main: #F5F3FF;
+  --bg-card: #FFFFFF;
+  --bg-elevated: #EDE9FE;
+  --text-main: #0F0A1E;
+  --text-muted: #6B7280;
+  --border-color: #DDD6FE;
+}
+
+[data-theme='dark'] {
+  --bg-main: #0C0E14;
+  --bg-card: #13151E;
+  --bg-elevated: #1A1D28;
+  --text-main: #F1F5F9;
+  --text-muted: #64748B;
+  --border-color: #1E2230;
+}
+
+body {
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  @apply overflow-x-hidden antialiased transition-colors duration-300;
+  font-family: var(--font-sans);
+}
+
+/* Hide scrollbars on horizontal scrollers (carousels, color rows, tab strips) */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+.glass {
+  background-color: color-mix(in srgb, var(--bg-card), transparent 15%);
+  @apply backdrop-blur-xl border border-white/10 transition-colors duration-300;
+}
+
+[data-theme='dark'] .glass {
+  background-color: color-mix(in srgb, var(--bg-card), transparent 10%);
+  @apply border-white/5;
+}
+
+.card-base {
+  background-color: var(--bg-card);
+  border-color: var(--border-color);
+  @apply p-4 rounded-3xl border transition-all duration-300;
+}
+
+.card-glow {
+  box-shadow: 0 2px 16px rgba(124, 58, 237, 0.05), 0 0 0 1px var(--border-color);
+}
+
+[data-theme='dark'] .card-glow {
+  box-shadow: 0 2px 20px rgba(124, 58, 237, 0.1), 0 0 0 1px var(--border-color);
+}
+
+/* Shimmer animation for progress bars */
+@keyframes shimmer {
+  0%   { transform: translateX(-200%); }
+  100% { transform: translateX(200%); }
+}
+.animate-shimmer {
+  animation: shimmer 2.5s ease-in-out infinite;
+}
+
+/* Tree sway */
+@keyframes tree-sway {
+  0%, 100% { transform: rotate(0deg); }
+  25%       { transform: rotate(-2deg); }
+  75%       { transform: rotate(2deg); }
+}
+.tree-sway {
+  animation: tree-sway 4s ease-in-out infinite;
+}
+
+/* Floating XP label */
+@keyframes float-up {
+  0%   { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-48px); }
+}
+.float-up {
+  animation: float-up 1.2s ease-out forwards;
+}
+
+/* Sheet slide up */
+@keyframes slide-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+.sheet-slide-up {
+  animation: slide-up 0.35s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+}
+
+/* Glow pulse */
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.6; }
+  50%       { opacity: 1; }
+}
+.glow-pulse {
+  animation: glow-pulse 2s ease-in-out infinite;
+}
