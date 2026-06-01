@@ -361,7 +361,7 @@ export default function App() {
       });
     }, 800);
     return () => { if (syncTimer.current) window.clearTimeout(syncTimer.current); };
-  }, [state.leaguePoints, state.leagueWeekPoints, state.leagueTier, state.leagueWeekStart, account, isAdmin, hydratingRef.current]);
+  }, [state.leaguePoints, state.leagueWeekPoints, state.leagueTier, state.leagueWeekStart, account, isAdmin, hydratingRef.current, hydratedForRef.current]);
 
   // â”€â”€ Account-bound cloud save + research progress (debounced) â”€â”€
   // Pushes (a) the full game state to the student's account so it follows them
