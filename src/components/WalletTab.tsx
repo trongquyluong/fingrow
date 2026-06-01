@@ -454,8 +454,8 @@ function AddSheet({
         animate={{ y: 0 }}
         exit={{ y: "100%" }}
         transition={{ type: "spring", damping: 26, stiffness: 240 }}
-        className="relative w-full max-w-md bg-[var(--bg-card)] rounded-t-3xl flex flex-col max-h-[90vh] overflow-y-auto"
-        style={{ overscrollBehavior: "contain" }}
+        className="relative w-full max-w-md bg-[var(--bg-card)] rounded-t-3xl flex flex-col"
+        style={{ height: "90dvh", maxHeight: "90dvh" }}
       >
         {/* Handle */}
         <div className="flex justify-center pt-3 pb-1 shrink-0">
@@ -470,7 +470,11 @@ function AddSheet({
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-5 flex flex-col gap-4">
+        {/* Scrollable body — explicit height, not flex-1 */}
+        <div
+          className="overflow-y-auto px-5 pb-4 flex flex-col gap-4"
+          style={{ height: "calc(90dvh - 140px)", flexShrink: 0 }}
+        >
           {/* Type toggle */}
           <div className="flex p-1 bg-[var(--bg-elevated)] rounded-full">
             {(["expense", "income"] as TransactionType[]).map(t => (
@@ -547,11 +551,10 @@ function AddSheet({
               className="w-full px-4 py-3 rounded-2xl bg-[var(--bg-main)] border border-[var(--border-color)] outline-none focus:border-violet-500 transition-colors text-sm"
             />
           </div>
-
         </div>
 
-        {/* Save — sticky at bottom so it's always visible */}
-        <div className="sticky bottom-0 px-5 pb-5 shrink-0 bg-[var(--bg-card)]">
+        {/* Save — always at bottom of sheet */}
+        <div className="px-5 pb-5 pt-2 shrink-0 bg-[var(--bg-card)]">
           <button
             onClick={handleSave}
             disabled={!canSave}
