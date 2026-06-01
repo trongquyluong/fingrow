@@ -442,27 +442,21 @@ function AddSheet({
 
   return (
     <motion.div
-      className="fixed inset-0 z-50 flex items-end justify-center"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
       onClick={onClose}
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
     >
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
       <motion.div
         onClick={e => e.stopPropagation()}
-        initial={{ y: "100%" }}
-        animate={{ y: 0 }}
-        exit={{ y: "100%" }}
-        transition={{ type: "spring", damping: 26, stiffness: 240 }}
-        className="relative w-full max-w-md bg-[var(--bg-card)] rounded-t-3xl flex flex-col"
-        style={{ maxHeight: "92dvh" }}
+        initial={{ opacity: 0, scale: 0.9, y: 10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 10 }}
+        transition={{ type: "spring", damping: 26, stiffness: 300 }}
+        className="relative w-full max-w-sm bg-[var(--bg-card)] rounded-3xl shadow-2xl shadow-black/40 flex flex-col"
       >
-        {/* Drag handle */}
-        <div className="flex justify-center pt-3 pb-2 shrink-0">
-          <div className="w-9 h-1 rounded-full bg-[var(--border-color)]" />
-        </div>
-
         {/* Header row */}
-        <div className="flex justify-between items-center px-5 pb-2 shrink-0">
+        <div className="flex justify-between items-center px-5 pt-5 pb-3 shrink-0">
           <h3 className="font-bold text-base">Add Transaction</h3>
           <button
             onClick={onClose}
@@ -472,8 +466,8 @@ function AddSheet({
           </button>
         </div>
 
-        {/* Form body — everything fits on one screen */}
-        <div className="flex flex-col gap-3 px-5 pb-2 overflow-y-auto">
+        {/* Form body */}
+        <div className="flex flex-col gap-3 px-5 pb-1">
 
           {/* Type toggle — compact pill row */}
           <div className="flex p-1 bg-[var(--bg-elevated)] rounded-full shrink-0">
@@ -494,7 +488,7 @@ function AddSheet({
             ))}
           </div>
 
-          {/* Amount — hero element */}
+          {/* Amount */}
           <div className="flex items-baseline gap-1 justify-center py-1 shrink-0">
             <span className="text-xl font-extrabold text-[var(--text-muted)]">$</span>
             <input
@@ -539,7 +533,7 @@ function AddSheet({
             </div>
           </div>
 
-          {/* Note — single-line compact */}
+          {/* Note */}
           <div className="shrink-0">
             <input
               type="text"
@@ -552,7 +546,7 @@ function AddSheet({
           </div>
         </div>
 
-        {/* Save button — always at bottom */}
+        {/* Save button */}
         <div className="px-5 pb-5 pt-3 shrink-0">
           <button
             onClick={handleSave}
