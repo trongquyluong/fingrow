@@ -409,7 +409,7 @@ function Donut({
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-// Add Sheet
+// Add Sheet — compact single-screen layout, no scroll needed
 // ════════════════════════════════════════════════════════════════════════════
 function AddSheet({
   onClose, onSave,
@@ -421,7 +421,6 @@ function AddSheet({
 
   const categories = WALLET_CATEGORIES.filter(c => c.type === type);
 
-  // When switching types, reset category to first valid
   const switchType = (newType: TransactionType) => {
     setType(newType);
     const first = WALLET_CATEGORIES.find(c => c.type === newType);
@@ -454,30 +453,35 @@ function AddSheet({
         animate={{ y: 0 }}
         exit={{ y: "100%" }}
         transition={{ type: "spring", damping: 26, stiffness: 240 }}
-        className="relative w-full max-w-md bg-[var(--bg-card)] rounded-t-3xl flex flex-col max-h-[90vh] overflow-y-auto"
-        style={{ overscrollBehavior: "contain" }}
+        className="relative w-full max-w-md bg-[var(--bg-card)] rounded-t-3xl flex flex-col"
+        style={{ maxHeight: "92dvh" }}
       >
-        {/* Handle */}
-        <div className="flex justify-center pt-3 pb-1 shrink-0">
-          <div className="w-10 h-1 rounded-full bg-[var(--border-color)]" />
+        {/* Drag handle */}
+        <div className="flex justify-center pt-3 pb-2 shrink-0">
+          <div className="w-9 h-1 rounded-full bg-[var(--border-color)]" />
         </div>
 
-        {/* Header */}
-        <div className="flex justify-between items-center px-5 py-3 shrink-0">
-          <h3 className="font-bold text-lg">Add Transaction</h3>
-          <button onClick={onClose} className="p-2 rounded-full bg-[var(--bg-main)] text-[var(--text-muted)] active:scale-90 transition-transform">
-            <X size={16} />
+        {/* Header row */}
+        <div className="flex justify-between items-center px-5 pb-2 shrink-0">
+          <h3 className="font-bold text-base">Add Transaction</h3>
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-full bg-[var(--bg-main)] text-[var(--text-muted)] active:scale-90 transition-transform"
+          >
+            <X size={14} />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-5 flex flex-col gap-4">
-          {/* Type toggle */}
-          <div className="flex p-1 bg-[var(--bg-elevated)] rounded-full">
+        {/* Form body — everything fits on one screen */}
+        <div className="flex flex-col gap-3 px-5 pb-2 overflow-y-auto">
+
+          {/* Type toggle — compact pill row */}
+          <div className="flex p-1 bg-[var(--bg-elevated)] rounded-full shrink-0">
             {(["expense", "income"] as TransactionType[]).map(t => (
               <button
                 key={t}
                 onClick={() => switchType(t)}
-                className={`flex-1 py-2 rounded-full font-bold text-sm transition-all ${
+                className={`flex-1 py-1.5 rounded-full font-bold text-xs transition-all ${
                   type === t
                     ? t === "expense"
                       ? "bg-red-500/15 text-red-500"
@@ -490,43 +494,43 @@ function AddSheet({
             ))}
           </div>
 
-          {/* Amount */}
-          <div>
-            <p className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Amount</p>
-            <div className="flex items-baseline gap-1 justify-center py-2">
-              <span className="text-2xl font-extrabold text-[var(--text-muted)]">$</span>
-              <input
-                type="number"
-                inputMode="decimal"
-                step="0.01"
-                value={amount}
-                onChange={e => setAmount(e.target.value)}
-                placeholder="0.00"
-                autoFocus
-                className="text-5xl font-extrabold tabular-nums bg-transparent border-0 outline-none text-center w-[180px] text-[var(--text-main)] placeholder:text-[var(--text-muted)] placeholder:opacity-30"
-              />
-            </div>
+          {/* Amount — hero element */}
+          <div className="flex items-baseline gap-1 justify-center py-1 shrink-0">
+            <span className="text-xl font-extrabold text-[var(--text-muted)]">$</span>
+            <input
+              type="number"
+              inputMode="decimal"
+              step="0.01"
+              value={amount}
+              onChange={e => setAmount(e.target.value)}
+              placeholder="0.00"
+              autoFocus
+              className="text-4xl font-extrabold tabular-nums bg-transparent border-0 outline-none text-center w-[160px] text-[var(--text-main)] placeholder:text-[var(--text-muted)] placeholder:opacity-30"
+            />
           </div>
 
-          {/* Category grid */}
+          {/* Category — 3-col compact grid */}
           <div>
-            <p className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Category</p>
-            <div className="grid grid-cols-4 gap-2">
-              {categories.map(c => {
+            <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Category</p>
+            <div className="grid grid-cols-3 gap-1.5">
+              {categories.slice(0, 9).map(c => {
                 const active = categoryId === c.id;
                 return (
                   <button
                     key={c.id}
                     onClick={() => setCategoryId(c.id)}
-                    className={`flex flex-col items-center gap-1 p-2 rounded-2xl border-2 transition-all ${
+                    className={`flex flex-col items-center gap-0.5 py-2 px-1 rounded-xl border transition-all ${
                       active
                         ? "border-violet-500 bg-violet-500/10"
                         : "border-[var(--border-color)] bg-[var(--bg-main)]"
                     }`}
                     style={active ? { borderColor: c.color, backgroundColor: `${c.color}15` } : undefined}
                   >
-                    <span className="text-xl">{c.icon}</span>
-                    <span className="text-[10px] font-bold text-center leading-tight" style={active ? { color: c.color } : undefined}>
+                    <span className="text-lg">{c.icon}</span>
+                    <span
+                      className="text-[9px] font-bold text-center leading-tight"
+                      style={active ? { color: c.color } : { color: "var(--text-muted)" }}
+                    >
                       {c.name}
                     </span>
                   </button>
@@ -535,29 +539,27 @@ function AddSheet({
             </div>
           </div>
 
-          {/* Note */}
-          <div>
-            <p className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Note (optional)</p>
+          {/* Note — single-line compact */}
+          <div className="shrink-0">
             <input
               type="text"
               value={note}
               onChange={e => setNote(e.target.value)}
-              placeholder="e.g. Lunch with friends"
+              placeholder="Add a note (optional)"
               maxLength={60}
-              className="w-full px-4 py-3 rounded-2xl bg-[var(--bg-main)] border border-[var(--border-color)] outline-none focus:border-violet-500 transition-colors text-sm"
+              className="w-full px-3 py-2 rounded-xl bg-[var(--bg-main)] border border-[var(--border-color)] outline-none focus:border-violet-500 transition-colors text-xs text-center placeholder:text-[var(--text-muted)]"
             />
           </div>
-
         </div>
 
-        {/* Save — sticky at bottom so it's always visible */}
-        <div className="sticky bottom-0 px-5 pb-5 shrink-0 bg-[var(--bg-card)]">
+        {/* Save button — always at bottom */}
+        <div className="px-5 pb-5 pt-3 shrink-0">
           <button
             onClick={handleSave}
             disabled={!canSave}
-            className={`w-full py-4 rounded-2xl font-bold transition-all ${
+            className={`w-full py-3.5 rounded-2xl font-bold text-sm transition-all active:scale-[0.97] ${
               canSave
-                ? "bg-gradient-to-r from-violet-600 to-violet-500 text-white shadow-lg shadow-violet-500/20 active:scale-95"
+                ? "bg-gradient-to-r from-violet-600 to-violet-500 text-white shadow-lg shadow-violet-500/20"
                 : "bg-[var(--bg-elevated)] text-[var(--text-muted)] cursor-not-allowed"
             }`}
           >
