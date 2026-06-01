@@ -1,10 +1,11 @@
-﻿/**
+/**
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
 
 import { useState, useEffect, useRef } from "react";
 import { motion } from "motion/react";
+import { Analytics } from '@vercel/analytics/react';
 import {
   Flame,
   Coins,
@@ -1321,6 +1322,8 @@ export default function App() {
           onGuest={finishOnboarding}
         />
       )}
+
+      <Analytics />
     </div>
   );
 }
