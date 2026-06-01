@@ -442,18 +442,18 @@ function AddSheet({
 
   return (
     <motion.div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 flex flex-col items-center justify-start pt-12 pb-4 px-4 overflow-y-auto"
       onClick={onClose}
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
     >
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
       <motion.div
         onClick={e => e.stopPropagation()}
-        initial={{ opacity: 0, scale: 0.9, y: 10 }}
+        initial={{ opacity: 0, scale: 0.9, y: -20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 10 }}
+        exit={{ opacity: 0, scale: 0.95, y: -10 }}
         transition={{ type: "spring", damping: 26, stiffness: 300 }}
-        className="relative w-full max-w-sm bg-[var(--bg-card)] rounded-3xl shadow-2xl shadow-black/40 flex flex-col"
+        className="relative w-full max-w-sm bg-[var(--bg-card)] rounded-3xl shadow-2xl shadow-black/40 flex flex-col shrink-0"
       >
         {/* Header row */}
         <div className="flex justify-between items-center px-5 pt-5 pb-3 shrink-0">
