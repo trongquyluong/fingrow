@@ -442,22 +442,22 @@ function AddSheet({
 
   return (
     <motion.div
-      className="fixed inset-0 z-50 flex flex-col items-center justify-start pt-12 pb-4 px-4 overflow-y-auto"
+      className="fixed inset-0 z-50 flex flex-col items-start pt-4 px-4 pb-4 overflow-y-auto"
       onClick={onClose}
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
     >
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
       <motion.div
         onClick={e => e.stopPropagation()}
-        initial={{ opacity: 0, scale: 0.9, y: -20 }}
+        initial={{ opacity: 0, scale: 0.9, y: -10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: -10 }}
+        exit={{ opacity: 0, scale: 0.95, y: -5 }}
         transition={{ type: "spring", damping: 26, stiffness: 300 }}
-        className="relative w-full max-w-sm bg-[var(--bg-card)] rounded-3xl shadow-2xl shadow-black/40 flex flex-col shrink-0"
+        className="relative w-full max-w-sm bg-[var(--bg-card)] rounded-3xl shadow-2xl shadow-black/40 shrink-0"
       >
         {/* Header row */}
-        <div className="flex justify-between items-center px-5 pt-5 pb-3 shrink-0">
-          <h3 className="font-bold text-base">Add Transaction</h3>
+        <div className="flex justify-between items-center px-5 pt-4 pb-2">
+          <h3 className="font-bold text-sm">Add Transaction</h3>
           <button
             onClick={onClose}
             className="p-1.5 rounded-full bg-[var(--bg-main)] text-[var(--text-muted)] active:scale-90 transition-transform"
@@ -467,7 +467,7 @@ function AddSheet({
         </div>
 
         {/* Form body */}
-        <div className="flex flex-col gap-3 px-5 pb-1">
+        <div className="flex flex-col gap-2 px-5 pb-1">
 
           {/* Type toggle — compact pill row */}
           <div className="flex p-1 bg-[var(--bg-elevated)] rounded-full shrink-0">
@@ -505,7 +505,7 @@ function AddSheet({
 
           {/* Category — 3-col compact grid */}
           <div>
-            <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Category</p>
+            <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Category</p>
             <div className="grid grid-cols-3 gap-1.5">
               {categories.slice(0, 9).map(c => {
                 const active = categoryId === c.id;
@@ -513,16 +513,16 @@ function AddSheet({
                   <button
                     key={c.id}
                     onClick={() => setCategoryId(c.id)}
-                    className={`flex flex-col items-center gap-0.5 py-2 px-1 rounded-xl border transition-all ${
+                    className={`flex flex-col items-center gap-0.5 py-1.5 px-1 rounded-xl border transition-all ${
                       active
                         ? "border-violet-500 bg-violet-500/10"
                         : "border-[var(--border-color)] bg-[var(--bg-main)]"
                     }`}
                     style={active ? { borderColor: c.color, backgroundColor: `${c.color}15` } : undefined}
                   >
-                    <span className="text-lg">{c.icon}</span>
+                    <span className="text-base">{c.icon}</span>
                     <span
-                      className="text-[9px] font-bold text-center leading-tight"
+                      className="text-[8px] font-bold text-center leading-tight"
                       style={active ? { color: c.color } : { color: "var(--text-muted)" }}
                     >
                       {c.name}
@@ -534,7 +534,7 @@ function AddSheet({
           </div>
 
           {/* Note */}
-          <div className="shrink-0">
+          <div>
             <input
               type="text"
               value={note}
@@ -547,11 +547,11 @@ function AddSheet({
         </div>
 
         {/* Save button */}
-        <div className="px-5 pb-5 pt-3 shrink-0">
+        <div className="px-5 pb-4 pt-2">
           <button
             onClick={handleSave}
             disabled={!canSave}
-            className={`w-full py-3.5 rounded-2xl font-bold text-sm transition-all active:scale-[0.97] ${
+            className={`w-full py-3 rounded-2xl font-bold text-sm transition-all active:scale-[0.97] ${
               canSave
                 ? "bg-gradient-to-r from-violet-600 to-violet-500 text-white shadow-lg shadow-violet-500/20"
                 : "bg-[var(--bg-elevated)] text-[var(--text-muted)] cursor-not-allowed"
