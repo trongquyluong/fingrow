@@ -66,15 +66,14 @@ create policy "Anonymous progress update"
 -- ────────────────────────────────────────────────────────────────────
 -- Research admin account.
 -- Username: fingrow_admin
--- Password hash below is SHA-256 of the plaintext credential handed over
--- separately (same hashing the app's login uses). Re-running updates the
--- password hash so this statement is idempotent.
+-- Password hash below is SHA-256 of 'meowmeow' (same hashing the app's login uses).
+-- Re-running updates the password hash so this statement is idempotent.
 -- ────────────────────────────────────────────────────────────────────
 insert into public.accounts
   (username, username_display, password_hash, avatar, full_name, school, joined_at, updated_at)
 values
   ('fingrow_admin', 'fingrow_admin',
-   'b53c543995e9b36075ad97537c5029154f5a7a98e2a2fce2d74d5fe503cdc581',
+   'ccd758e72a8a8cb5f140bab26837f363908550f2558ed86d229ec9016fed49b9',
    '🛡️', 'Research Admin', 'Fingrow Research', now(), now())
 on conflict (username) do update
   set password_hash = excluded.password_hash,
