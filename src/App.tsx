@@ -420,6 +420,19 @@ export default function App() {
         if (!cancelled) writeSyncMarker({ username: lower, at: at ?? new Date().toISOString() });
       }
       if (!cancelled) { hydratedForRef.current = uname; hydratingRef.current = false; }
+ // Bootstrap leaderboard row for users with no points yet (syncScore
+ // effect's debounce only fires when leaguePoints/weekPoints change, so
+ // brand-new accounts with 0 LP would never create a leaderboard row).
+ if (!cancelled && !isAdmin && SUPABASE_ENABLED && state.leagueWeekStart) {
+ syncScore({
+ username: uname,
+ avatar: account?.avatar ?? "⭐",
+ totalPoints: state.leaguePoints,
+ weekPoints: state.leagueWeekPoints,
+ tier: state.leagueTier,
+ weekStart: state.leagueWeekStart,
+ });
+ }
     })();
     return () => { cancelled = true; };
     // `state` is intentionally read at hydrate time (snapshot) and not a trigger.
