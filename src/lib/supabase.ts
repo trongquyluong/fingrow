@@ -84,7 +84,7 @@ export async function fetchWeeklyLeaderboard(weekStart: string, limit = 20): Pro
   const { data, error } = await sb
     .from("leaderboard")
     .select("*")
-    .eq("week_start", weekStart)
+    .or(`week_start.eq.${weekStart},updated_at.gte.${new Date(Date.now() - 14 * 86400_000).toISOString()}`)
     .order("week_points", { ascending: false })
     .limit(limit);
   if (error) {
