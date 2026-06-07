@@ -81,7 +81,6 @@ export default function AdminDashboard({ onBack }: Props) {
 
     return {
       n, schools, activeToday, avgAccuracy, avgStreak, avgLP, totalAnswered,
-      avgMasteryPct, avgActiveDays,
       masteryDist, topics,
     };
   }, [rows, today]);
