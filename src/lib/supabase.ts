@@ -81,7 +81,10 @@ export async function syncScore(payload: {
 export async function fetchWeeklyLeaderboard(weekStart: string, limit = 20): Promise<LeaderboardRow[]> {
   const sb = supabase();
   if (!sb) return [];
-  const [{ data, error }, { data: acctData }] = await Promise.all([
+  // Three reads in parallel: leaderboard rows, registered accounts (for
+  // display name + avatar + dedupe), and each account's cloud-saved state
+  // (source of truth for LP/tier when no leaderboard row exists yet).
+  const [{ data, error }, { data: acctData }, { data: stateData }] = await Promise.all([
     sb
       .from("leaderboard")
       .select("*")
@@ -89,34 +92,51 @@ export async function fetchWeeklyLeaderboard(weekStart: string, limit = 20): Pro
       .order("week_points", { ascending: false })
       .limit(limit),
     sb.from("accounts").select("username, username_display, avatar"),
+    // Project only the two fields we need from the jsonb state blob.
+    sb.from("account_state").select("username, state->leaguePoints, state->leagueTier"),
   ]);
   if (error) {
     console.error("fetchWeeklyLeaderboard", error);
     return [];
   }
-  // Show only registered students (hide guests). Also synthesise a 0-LP row
-  // for any registered account that hasn't synced a leaderboard row yet, so
-  // brand-new accounts show up at the bottom of the ladder from day one
-  // instead of being invisible until they earn their first LP.
+  // Map username → real LP/tier for accounts whose leaderboard row is
+  // missing, so they show their actual progress instead of a misleading 0.
+  const realByUser = new Map<string, { leaguePoints: number; leagueTier: string }>();
+  for (const s of (stateData ?? []) as { username: string; leaguePoints: number | null; leagueTier: string | null }[]) {
+    if (s.leaguePoints != null) {
+      realByUser.set(s.username.toLowerCase(), {
+        leaguePoints: s.leaguePoints,
+        leagueTier: s.leagueTier ?? "iron",
+      });
+    }
+  }
+  // Show only registered students (hide guests). For any registered account
+  // that hasn't synced a leaderboard row this week, synthesise one using
+  // their real saved LP/tier when available. We use `total_points` as the
+  // displayed week value because (a) the LeagueTab shows week_points and
+  // would otherwise display a misleading 0, and (b) for a missing row, the
+  // player's lifetime total is the best signal we have until they sync
+  // again. Brand-new accounts with no cloud state fall back to 0/iron.
   const rows = ((data ?? []) as LeaderboardRow[]);
   const seen = new Set(rows.map(r => r.username.toLowerCase()));
   const synthetic: LeaderboardRow[] = [];
   for (const a of (acctData ?? []) as Pick<AccountRow, "username" | "username_display" | "avatar">[]) {
     if (seen.has(a.username.toLowerCase())) continue;
     if (isAdminUsername(a.username)) continue;
+    const real = realByUser.get(a.username.toLowerCase());
     synthetic.push({
       user_id: `synthetic:${a.username}`,
       username: a.username_display,
       avatar: a.avatar,
-      total_points: 0,
-      week_points: 0,
-      tier: "iron",
+      total_points: real?.leaguePoints ?? 0,
+      week_points: real?.leaguePoints ?? 0,    // show real LP in the weekly column when no row exists
+      tier: real?.leagueTier ?? "iron",
       week_start: weekStart,
       updated_at: new Date(0).toISOString(),
     });
   }
   return [...rows, ...synthetic]
-    .sort((a, b) => b.week_points - a.week_points)
+    .sort((a, b) => (b.total_points - a.total_points) || (b.week_points - a.week_points))
     .slice(0, limit);
 }
 
