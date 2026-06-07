@@ -12,7 +12,8 @@ export type LeagueTier =
   | "diamond"
   | "master"
   | "grandmaster"
-  | "challenger";
+  | "challenger"
+  | "sovereign";
 
 /** Divisions only apply to Iron → Diamond. Master+ have no divisions. */
 export type LeagueDivision = "IV" | "III" | "II" | "I" | null;
@@ -251,4 +252,7 @@ export interface UserState {
   baoTycoonProfit?: number;
   baoTycoonDays?: number;
   baoTycoonRounds?: number;
+  debtDashCorrect?: number;
+  debtDashPlayed?: number;
+  debtDashRounds?: number;
 }

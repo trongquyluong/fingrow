@@ -25,6 +25,7 @@ import {
   formatRank,
 } from "../constants";
 import { AccountData } from "./AccountModal";
+import RankCrest from "./RankCrest";
 import {
   SUPABASE_ENABLED,
   fetchWeeklyLeaderboard,
@@ -224,8 +225,18 @@ export default function LeagueTab({
         <div className="flex justify-between items-start relative">
           <div>
             <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Your Rank</p>
-            <div className="mt-2">
-              <RankBadge info={rank} size="xl" />
+            <div className="mt-2 flex items-center gap-3">
+              <RankCrest tier={rank.tier} size={72} division={rank.division} />
+              <div>
+                <p className="font-black text-xl leading-tight" style={{ color: cfg.color }}>
+                  {cfg.label}
+                </p>
+                {rank.division && (
+                  <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">
+                    Division {rank.division}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
           <div className="text-right">
@@ -386,16 +397,14 @@ export default function LeagueTab({
                     : undefined
                 }
               >
-                <div
-                  className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 text-base"
-                  style={{
-                    background: isUnlocked
-                      ? `linear-gradient(135deg, ${tCfg.gradient[0]}, ${tCfg.gradient[1]})`
-                      : "#33333355",
-                    opacity: isUnlocked ? 1 : 0.4,
-                  }}
-                >
-                  {isUnlocked ? tCfg.icon : <Lock size={12} className="text-white" />}
+                <div className="shrink-0" style={{ opacity: isUnlocked ? 1 : 0.4 }}>
+                  {isUnlocked ? (
+                    <RankCrest tier={tier} size={32} />
+                  ) : (
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "#33333355" }}>
+                      <Lock size={12} className="text-white" />
+                    </div>
+                  )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p

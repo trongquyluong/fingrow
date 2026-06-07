@@ -11,7 +11,7 @@ import {
   TrendingUp, Gamepad2, ChevronRight, Clock, Zap, Trophy,
 } from "lucide-react";
 
-export type GameId = "stocks" | "life" | "scam_spotter" | "bao_tycoon" | "comingSoon";
+export type GameId = "stocks" | "life" | "scam_spotter" | "bao_tycoon" | "debt_dash";
 
 export interface GameDef {
   id: GameId;
@@ -73,16 +73,15 @@ const GAMES: GameDef[] = [
     lpHint: "Up to +600 LP + badge",
   },
   {
-    id: "comingSoon",
-    title: "Budget Showdown",
-    tagline: "Survive a month on a tight budget — coming soon!",
-    icon: "💰",
-    accentFrom: "#10B981",
-    accentTo: "#065F46",
+    id: "debt_dash",
+    title: "Debt Dash",
+    tagline: "Swipe through 6 financial decisions — pick the smarter move, learn the lesson.",
+    icon: "💨",
+    accentFrom: "#22D3EE",
+    accentTo: "#0E7490",
     difficulty: "Easy",
     estTime: "3 min",
-    lpHint: "Coming soon",
-    comingSoon: true,
+    lpHint: "Up to +90 LP per round",
   },
 ];
 

@@ -30,7 +30,9 @@ import LifeTab, { LifeRunSummary } from "./components/LifeTab";
 import GamesHub from "./components/GamesHub";
 import ScamSpotter, { ScamSpotterResult } from "./components/games/ScamSpotter";
 import BaoStandTycoon, { BaoTycoonResult } from "./components/games/BaoStandTycoon";
+import DebtDash, { DebtDashResult } from "./components/games/DebtDash";
 import LearnTab, { AnswerResult } from "./components/LearnTab";
+import PromotionModal from "./components/PromotionModal";
 import WeeklyQuestsCard from "./components/WeeklyQuestsCard";
 import RibbonsCard from "./components/RibbonsCard";
 import TrophiesScreen from "./components/TrophiesScreen";
@@ -40,7 +42,7 @@ import Onboarding from "./components/Onboarding";
 import Avatar from "./components/Avatar";
 import AdminConsole from "./components/AdminConsole";
 import { useLocalStorage } from "./hooks/useLocalStorage";
-import { UserState, Transaction, AvatarSlot, AvatarState, WeeklyQuest, DailyChallengeResult } from "./types";
+import { UserState, Transaction, AvatarSlot, AvatarState, WeeklyQuest, DailyChallengeResult, LeagueTier } from "./types";
 import {
   STOCKS, SHOP_ITEMS, getRank, formatRank, TIER_CONFIG,
   LP_REWARDS, pickWeeklyQuests, RIBBONS,
@@ -150,6 +152,9 @@ const DEFAULT_STATE: UserState = {
   baoTycoonProfit: 0,
   baoTycoonDays: 0,
   baoTycoonRounds: 0,
+  debtDashCorrect: 0,
+  debtDashPlayed: 0,
+  debtDashRounds: 0,
 };
 
 const tierOfPoints = (points: number) => getRank(points).tier;
@@ -181,6 +186,30 @@ export default function App() {
     lifeRibbons: stateRaw.lifeRibbons ?? [],
     lifeRunState: { ...DEFAULT_STATE.lifeRunState, ...(stateRaw.lifeRunState ?? {}) },
   };
+
+  // Rank-up celebration: detect when leagueTier changes and pop the
+  // LoL-style promotion modal. We keep prevTierRef at the top of the
+  // component (refs must be declared before any effect that uses them,
+  // per the project's do-not-touch list).
+  const prevTierRef = useRef<LeagueTier>(state.leagueTier);
+  const lastPromoRef = useRef<number>(0);
+  const [pendingPromotion, setPendingPromotion] = useState<{
+    tier: LeagueTier; from: LeagueTier; lpEarned: number;
+  } | null>(null);
+  useEffect(() => {
+    const prev = prevTierRef.current;
+    const curr = state.leagueTier;
+    if (prev !== curr) {
+      // Throttle: don't fire more than one promotion per 1.5s window
+      // (guards against batched state changes / hydration).
+      const now = Date.now();
+      if (now - lastPromoRef.current > 1500) {
+        lastPromoRef.current = now;
+        setPendingPromotion({ tier: curr, from: prev, lpEarned: state.leaguePoints });
+      }
+      prevTierRef.current = curr;
+    }
+  }, [state.leagueTier, state.leaguePoints]);
 
   const [showHowToPlay, setShowHowToPlay] = useState(false);
   const [showAccount, setShowAccount] = useState(false);
@@ -885,6 +914,30 @@ export default function App() {
     });
   };
 
+  // ── Debt Dash result ──
+  const handleDebtDashComplete = (r: DebtDashResult) => {
+    setState(prev => {
+      const today = new Date().toDateString();
+      let lp = r.totalLP;
+      const ds = applyDailyStreak(prev, today);
+      lp += ds.streakLP;
+      const total = prev.leaguePoints + lp;
+      return {
+        ...prev,
+        streak: ds.streak,
+        leaguePoints: total,
+        leagueTier: tierOfPoints(total),
+        leagueWeekPoints: prev.leagueWeekPoints + lp,
+        lastDailyActivity: today,
+        mood: "happy",
+        // Research cumulative stats
+        debtDashCorrect: (prev.debtDashCorrect ?? 0) + r.correctCount,
+        debtDashPlayed: (prev.debtDashPlayed ?? 0) + r.totalAnswered,
+        debtDashRounds: (prev.debtDashRounds ?? 0) + 1,
+      };
+    });
+  };
+
   // ── LP #4 Frugal Ribbons ──
   const handleLifeEnded = (summary: LifeRunSummary) => {
     setState(prev => {
@@ -965,8 +1018,20 @@ export default function App() {
 
   // Admins don't play — they get the admin console instead of the student app
   // (no leaderboard, no games/learn). Full account management lives in there.
+  const promotionModal = pendingPromotion ? (
+    <PromotionModal
+      promotion={pendingPromotion}
+      onClose={() => setPendingPromotion(null)}
+    />
+  ) : null;
+
   if (isAdmin && account) {
-    return <AdminConsole account={account} onLogout={() => handleAccountSave(null)} />;
+    return (
+      <>
+        <AdminConsole account={account} onLogout={() => handleAccountSave(null)} />
+        {promotionModal}
+      </>
+    );
   }
 
   return (
@@ -1238,6 +1303,7 @@ export default function App() {
             else if (g === "life") setActiveTab("life");
             else if (g === "scam_spotter") setActiveTab("scam_spotter");
             else if (g === "bao_tycoon") setActiveTab("bao_tycoon");
+            else if (g === "debt_dash") setActiveTab("debt_dash");
           }}
         />
       )}
@@ -1255,6 +1321,14 @@ export default function App() {
         <BaoStandTycoon
           onExit={() => setActiveTab("games")}
           onComplete={(r) => handleBaoTycoonComplete(r)}
+        />
+      )}
+
+      {/* Debt Dash */}
+      {activeTab === "debt_dash" && (
+        <DebtDash
+          onExit={() => setActiveTab("games")}
+          onComplete={(r) => handleDebtDashComplete(r)}
         />
       )}
 
@@ -1359,6 +1433,12 @@ export default function App() {
       <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
 
       {showHowToPlay && <HowToPlayModal onClose={() => setShowHowToPlay(false)} />}
+      {pendingPromotion && (
+        <PromotionModal
+          promotion={pendingPromotion}
+          onClose={() => setPendingPromotion(null)}
+        />
+      )}
       {showAccount && (
         <AccountModal
           account={account}
