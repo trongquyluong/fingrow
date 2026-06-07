@@ -46,7 +46,8 @@ import {
   LP_REWARDS, pickWeeklyQuests, RIBBONS,
 } from "./constants";
 import {
-  syncScore, syncProgress, saveAccountState, fetchAccountState,
+  syncScore, syncProgress, syncProgressHistory,
+  saveAccountState, fetchAccountState,
   isAdminUsername, SUPABASE_ENABLED,
 } from "./lib/supabase";
 import { buildProgressSnapshot } from "./lib/analytics";
@@ -142,6 +143,13 @@ const DEFAULT_STATE: UserState = {
   budgetStreakDays: 0,
   budgetLastCheckDate: null,
   budgetBossClaimedThisWeek: false,
+  // Research cumulative stats (see UserState)
+  scamSpotterCorrect: 0,
+  scamSpotterPlayed: 0,
+  scamSpotterRounds: 0,
+  baoTycoonProfit: 0,
+  baoTycoonDays: 0,
+  baoTycoonRounds: 0,
 };
 
 const tierOfPoints = (points: number) => getRank(points).tier;
@@ -376,7 +384,25 @@ export default function App() {
     if (hydratingRef.current || hydratedForRef.current !== account.username) return;
     if (progressTimer.current) window.clearTimeout(progressTimer.current);
     progressTimer.current = window.setTimeout(async () => {
-      syncProgress(buildProgressSnapshot(state, account, new Date().toDateString()));
+      const snap = buildProgressSnapshot(state, account, new Date().toDateString());
+      syncProgress(snap);
+      // Weekly history archive — idempotent upsert by (username, week_key)
+      // so the latest in-week state wins. week_key comes from the same
+      // Monday.toDateString() used for the league reset.
+      syncProgressHistory({
+        username: account.username,
+        week_key: state.leagueWeekStart ?? new Date().toDateString(),
+        accuracy: snap.accuracy,
+        mastered_count: snap.mastered_count,
+        questions_seen: snap.questions_seen,
+        questions_correct: snap.questions_correct,
+        league_points: snap.league_points,
+        streak: snap.streak,
+        daily_done_today: snap.daily_done_today,
+        transactions_count: snap.transactions_count,
+        ribbons_count: snap.ribbons_count,
+        details: snap.details,
+      });
       const at = await saveAccountState(account.username, state);
       if (at) writeSyncMarker({ username: account.username.trim().toLowerCase(), at });
     }, 1500);
@@ -824,6 +850,10 @@ export default function App() {
         coins: prev.coins + coins,
         lastDailyActivity: today,
         mood: "happy",
+        // Research cumulative stats
+        scamSpotterCorrect: (prev.scamSpotterCorrect ?? 0) + r.correctCount,
+        scamSpotterPlayed: (prev.scamSpotterPlayed ?? 0) + r.totalAnswered,
+        scamSpotterRounds: (prev.scamSpotterRounds ?? 0) + 1,
       };
     });
   };
@@ -847,6 +877,10 @@ export default function App() {
         coins: prev.coins + coins,
         lastDailyActivity: today,
         mood: "happy",
+        // Research cumulative stats
+        baoTycoonProfit: (prev.baoTycoonProfit ?? 0) + r.totalProfit,
+        baoTycoonDays: (prev.baoTycoonDays ?? 0) + (r.history?.length ?? 0),
+        baoTycoonRounds: (prev.baoTycoonRounds ?? 0) + 1,
       };
     });
   };

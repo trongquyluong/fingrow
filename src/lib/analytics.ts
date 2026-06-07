@@ -23,6 +23,57 @@ function levelFromXp(xp: number): number {
   return 5;
 }
 
+/**
+ * Per-topic early/recent proxy for pre/post literacy comparison.
+ *
+ * Mastery only stores aggregates (seen/correct/firstSeen/lastSeen per question)
+ * — not per-attempt logs. We proxy "early" vs "recent" by sorting each topic's
+ * attempted questions by `firstSeen` timestamp, splitting at the median, and
+ * accumulating seen/correct on each side. Topics with <2 questions are pushed
+ * into both buckets equally (no improvement signal).
+ */
+function perTopicHalfAccuracy(state: UserState): {
+  perTopicEarly: Record<string, { seen: number; correct: number }>;
+  perTopicRecent: Record<string, { seen: number; correct: number }>;
+} {
+  const mastery = state.quizMastery ?? {};
+  const byTopic: Record<string, [string, number, number, string | null][]> = {};
+  // [qid, seen, correct, firstSeen]
+  for (const [qid, m] of Object.entries(mastery)) {
+    if (!m || m.seen <= 0) continue;
+    const topic = QID_TOPIC[qid] ?? "Other";
+    (byTopic[topic] ??= []).push([qid, m.seen, m.correct, m.firstSeen ?? null]);
+  }
+  const perTopicEarly: Record<string, { seen: number; correct: number }> = {};
+  const perTopicRecent: Record<string, { seen: number; correct: number }> = {};
+  for (const [topic, qs] of Object.entries(byTopic)) {
+    const seenAcc = { seen: 0, correct: 0 };
+    if (qs.length < 2) {
+      // No signal — push the same totals to both halves.
+      for (const [, s, c] of qs) { seenAcc.seen += s; seenAcc.correct += c; }
+      perTopicEarly[topic] = { ...seenAcc };
+      perTopicRecent[topic] = { ...seenAcc };
+      continue;
+    }
+    qs.sort((a, b) => {
+      const ta = a[3] ? new Date(a[3]).getTime() : Number.POSITIVE_INFINITY;
+      const tb = b[3] ? new Date(b[3]).getTime() : Number.POSITIVE_INFINITY;
+      return ta - tb;
+    });
+    const mid = Math.floor(qs.length / 2);
+    const early = { seen: 0, correct: 0 };
+    const recent = { seen: 0, correct: 0 };
+    for (let i = 0; i < qs.length; i++) {
+      const [, s, c] = qs[i];
+      if (i < mid) { early.seen += s; early.correct += c; }
+      else { recent.seen += s; recent.correct += c; }
+    }
+    perTopicEarly[topic] = early;
+    perTopicRecent[topic] = recent;
+  }
+  return { perTopicEarly, perTopicRecent };
+}
+
 /** Build the full progress row for a student. `today` is a toDateString() value. */
 export function buildProgressSnapshot(
   state: UserState,
@@ -84,6 +135,45 @@ export function buildProgressSnapshot(
 
   const quests = state.weeklyQuests ?? [];
 
+  // Pre/post per-topic halves (research proxy for "early" vs "recent" accuracy)
+  const { perTopicEarly, perTopicRecent } = perTopicHalfAccuracy(state);
+
+  // Stock portfolio math (mirrors App.tsx sellStock pricing).
+  let stockPortfolioValue = 0;
+  let costBasis = 0;
+  for (const [id, qtyRaw] of Object.entries(state.stockHoldings ?? {})) {
+    const qty = Number(qtyRaw) || 0;
+    if (qty <= 0) continue;
+    const price = state.stockPrices?.[id] ?? 0;
+    const avg = state.stockAvgBuy?.[id] ?? 0;
+    stockPortfolioValue += qty * price;
+    costBasis += qty * avg;
+  }
+  const stockNetPnL = stockPortfolioValue - costBasis;
+  const stockCash = state.stockCash ?? 0;
+
+  // Engagement proxy: union of mastery firstSeen/lastSeen + transaction dates.
+  // (We don't have a per-day activity log; this is a coarse estimate of
+  //  "how many distinct days a student has shown up".)
+  const activeDaySet = new Set<string>();
+  let earliest: string | null = null;
+  const consider = (iso?: string | null) => {
+    if (!iso) return;
+    let d: Date;
+    try { d = new Date(iso); } catch { return; }
+    if (Number.isNaN(d.getTime())) return;
+    const key = d.toDateString();
+    activeDaySet.add(key);
+    if (!earliest || key < earliest) earliest = key;
+  };
+  for (const m of Object.values(state.quizMastery ?? {})) {
+    consider(m.firstSeen);
+    consider(m.lastSeen);
+  }
+  for (const t of state.transactions ?? []) consider(t.date);
+  const daysActive = activeDaySet.size;
+  const firstActiveDate = earliest;
+
   const details: ProgressDetails = {
     masteryDistribution,
     topicAccuracy,
@@ -98,6 +188,26 @@ export function buildProgressSnapshot(
     walletIncome,
     walletExpense,
     topCategories,
+    // Research extensions
+    scamSpotterScore: state.scamSpotterCorrect ?? 0,
+    scamSpotterPlayed: state.scamSpotterPlayed ?? 0,
+    scamSpotterRounds: state.scamSpotterRounds ?? 0,
+    baoTycoonProfit: state.baoTycoonProfit ?? 0,
+    baoTycoonDays: state.baoTycoonDays ?? 0,
+    baoTycoonRounds: state.baoTycoonRounds ?? 0,
+    lifeRibbonsList: state.lifeRibbons ?? [],
+    lifeRunState: state.lifeRunState ?? undefined,
+    stockPortfolioValue,
+    stockNetPnL,
+    stockCash,
+    monthlyBudget: state.monthlyBudget ?? 0,
+    weeklyBudget: state.weeklyBudget ?? 0,
+    categoryBudgets: (state.categoryBudgets ?? {}) as Record<string, number>,
+    coins: state.coins ?? 0,
+    firstActiveDate,
+    daysActive,
+    perTopicEarly,
+    perTopicRecent,
   };
 
   return {

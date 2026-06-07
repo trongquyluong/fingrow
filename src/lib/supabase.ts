@@ -178,6 +178,32 @@ export interface ProgressDetails {
   walletIncome: number;
   walletExpense: number;
   topCategories: { categoryId: string; total: number; count: number }[];
+  // ─── Research extensions (optional so old rows hydrate) ───
+  scamSpotterScore?: number;
+  scamSpotterPlayed?: number;
+  scamSpotterRounds?: number;
+  baoTycoonProfit?: number;
+  baoTycoonDays?: number;
+  baoTycoonRounds?: number;
+  lifeRibbonsList?: string[];
+  lifeRunState?: {
+    investedBefore25?: boolean;
+    everInDebt?: boolean;
+    assetClassesUsed?: string[];
+    hasInsurance?: boolean;
+    cpfMaxed?: boolean;
+  };
+  stockPortfolioValue?: number;
+  stockNetPnL?: number;
+  stockCash?: number;
+  monthlyBudget?: number;
+  weeklyBudget?: number;
+  categoryBudgets?: Record<string, number>;
+  coins?: number;
+  firstActiveDate?: string | null;
+  daysActive?: number;
+  perTopicEarly?: Record<string, { seen: number; correct: number }>;
+  perTopicRecent?: Record<string, { seen: number; correct: number }>;
 }
 
 export interface StudentProgressRow {
@@ -348,6 +374,50 @@ export async function syncProgress(row: StudentProgressRow): Promise<void> {
     .from("student_progress")
     .upsert({ ...row, updated_at: new Date().toISOString() }, { onConflict: "username" });
   if (error) console.warn("syncProgress", error.message);
+}
+
+// ─── Weekly research history ──────────────────────────────────────────────
+// One row per (username, week_key). Latest in-week state wins on upsert.
+// Drives longitudinal trends, retention, and pre/post literacy comparisons.
+export interface StudentProgressHistoryRow {
+  username: string;
+  week_key: string;            // monday.toDateString() from App.tsx
+  recorded_at: string;
+  accuracy: number;
+  mastered_count: number;
+  questions_seen: number;
+  questions_correct: number;
+  league_points: number;
+  streak: number;
+  daily_done_today: number;
+  transactions_count: number;
+  ribbons_count: number;
+  details: ProgressDetails | null;
+}
+
+export async function syncProgressHistory(
+  row: Omit<StudentProgressHistoryRow, "recorded_at">,
+): Promise<void> {
+  const sb = supabase();
+  if (!sb) return;
+  const { error } = await sb
+    .from("student_progress_history")
+    .upsert(
+      { ...row, recorded_at: new Date().toISOString() },
+      { onConflict: "username,week_key" },
+    );
+  if (error) console.warn("syncProgressHistory", error.message);
+}
+
+export async function fetchAllHistory(): Promise<StudentProgressHistoryRow[]> {
+  const sb = supabase();
+  if (!sb) return [];
+  const { data, error } = await sb
+    .from("student_progress_history")
+    .select("*")
+    .order("week_key", { ascending: true });
+  if (error) { console.warn("fetchAllHistory", error.message); return []; }
+  return (data ?? []) as StudentProgressHistoryRow[];
 }
 
 /** Fetch every student's progress (admin/research view), highest LP first.

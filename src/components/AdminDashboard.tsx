@@ -13,12 +13,13 @@ import { motion } from "motion/react";
 import {
   ChevronLeft, RefreshCw, Users, Target, Flame, GraduationCap,
   Download, ChevronDown, School as SchoolIcon, AlertTriangle, WifiOff,
+  TrendingUp, TrendingDown, Sparkles,
 } from "lucide-react";
 import {
-  fetchAllProgress, isAdminUsername, SUPABASE_ENABLED,
-  StudentProgressRow,
+  fetchAllProgress, fetchAllHistory, isAdminUsername, SUPABASE_ENABLED,
+  StudentProgressRow, StudentProgressHistoryRow,
 } from "../lib/supabase";
-import { TIER_CONFIG, MASTERY_NAMES, MASTERY_COLORS } from "../constants";
+import { TIER_CONFIG, MASTERY_NAMES, MASTERY_COLORS, RIBBONS } from "../constants";
 import { LeagueTier } from "../types";
 
 interface Props {
@@ -27,17 +28,22 @@ interface Props {
 }
 
 const pct = (n: number) => `${Math.round(n * 100)}%`;
+const fmtDelta = (d: number) => `${d >= 0 ? "+" : ""}${Math.round(d * 100)}pp`;
+const fmtDeltaPts = (d: number) => `${d >= 0 ? "+" : ""}${Math.round(d)}`;
 
 export default function AdminDashboard({ onBack }: Props) {
   const [rows, setRows] = useState<StudentProgressRow[]>([]);
+  const [history, setHistory] = useState<StudentProgressHistoryRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [cohortKey, setCohortKey] = useState<string>("all"); // "all" | school | age-bucket
   const today = new Date().toDateString();
 
   const load = async () => {
     setLoading(true);
-    const data = await fetchAllProgress();
+    const [data, hist] = await Promise.all([fetchAllProgress(), fetchAllHistory()]);
     setRows(data.filter(r => !isAdminUsername(r.username)));
+    setHistory(hist);
     setLoading(false);
   };
 
@@ -73,8 +79,100 @@ export default function AdminDashboard({ onBack }: Props) {
       .filter(t => t.seen >= 1)
       .sort((a, b) => a.acc - b.acc); // weakest first (research signal)
 
-    return { n, schools, activeToday, avgAccuracy, avgStreak, avgLP, totalAnswered, masteryDist, topics };
+    return {
+      n, schools, activeToday, avgAccuracy, avgStreak, avgLP, totalAnswered,
+      avgMasteryPct, avgActiveDays,
+      masteryDist, topics,
+    };
   }, [rows, today]);
+
+  // ── Cohort filter: by school or by age bucket ──
+  const schoolList = useMemo(
+    () => Array.from(new Set(rows.map(r => r.school).filter(Boolean))).sort() as string[],
+    [rows],
+  );
+  const ageBucket = (age: number | null) => {
+    if (age == null) return null;
+    if (age <= 14) return '13-14y';
+    if (age <= 16) return '15-16y';
+    if (age <= 18) return '17-18y';
+    return '19+y';
+  };
+  const cohortRows = useMemo(() => {
+    if (cohortKey === 'all') return rows;
+    if (cohortKey.endsWith('y')) {
+      return rows.filter(r => ageBucket(r.age ?? null) === cohortKey);
+    }
+    return rows.filter(r => r.school === cohortKey);
+  }, [rows, cohortKey]);
+  const cohortAgg = useMemo(() => {
+    const n = cohortRows.length;
+    if (!n) return { n: 0, avgAccuracy: 0, avgLP: 0, avgMasteryPct: 0, avgActiveDays: 0 };
+    const withAttempts = cohortRows.filter(r => r.questions_seen > 0);
+    const avgAccuracy = withAttempts.length
+      ? withAttempts.reduce((s, r) => s + r.accuracy, 0) / withAttempts.length : 0;
+    const avgLP = cohortRows.reduce((s, r) => s + r.league_points, 0) / n;
+    const avgMasteryPct = cohortRows.reduce(
+      (s, r) => s + (r.questions_seen ? r.mastered_count / r.questions_seen : 0), 0,
+    ) / n;
+    const avgActiveDays = cohortRows.reduce((s, r) => s + (r.details?.daysActive ?? 0), 0) / n;
+    return { n, avgAccuracy, avgLP, avgMasteryPct, avgActiveDays };
+  }, [cohortRows]);
+
+  // ── Pre/post per-topic literacy gain (merge across all students) ──
+  const prePost = useMemo(() => {
+    const m = new Map<string, { early: { seen: number; correct: number }; recent: { seen: number; correct: number } }>();
+    for (const r of rows) {
+      const early = r.details?.perTopicEarly ?? {};
+      const recent = r.details?.perTopicRecent ?? {};
+      const topics = new Set([...Object.keys(early), ...Object.keys(recent)]);
+      for (const t of topics) {
+        const e = m.get(t) ?? { early: { seen: 0, correct: 0 }, recent: { seen: 0, correct: 0 } };
+        if (early[t]) { e.early.seen += early[t].seen; e.early.correct += early[t].correct; }
+        if (recent[t]) { e.recent.seen += recent[t].seen; e.recent.correct += recent[t].correct; }
+        m.set(t, e);
+      }
+    }
+    const all = Array.from(m.entries())
+      .map(([topic, v]) => {
+        const totalSeen = v.early.seen + v.recent.seen;
+        const earlyAcc = v.early.seen ? v.early.correct / v.early.seen : 0;
+        const recentAcc = v.recent.seen ? v.recent.correct / v.recent.seen : 0;
+        return {
+          topic,
+          early: v.early, recent: v.recent,
+          earlyAcc, recentAcc,
+          lift: recentAcc - earlyAcc,
+          totalSeen,
+        };
+      })
+      .filter(t => t.totalSeen >= 3)
+      .sort((a, b) => b.lift - a.lift);
+    return all;
+  }, [rows]);
+
+  // ── Engagement-vs-learning lists ──
+  const engagementLists = useMemo(() => {
+    const candidates = rows
+      .map(r => ({
+        username: r.username,
+        name: r.username_display,
+        avatar: r.avatar,
+        engagement: r.questions_seen,
+        accuracy: r.accuracy,
+        daysActive: r.details?.daysActive ?? 0,
+      }))
+      .filter(r => r.engagement >= 1);
+    const struggling = [...candidates]
+      .filter(r => r.engagement >= 3)
+      .sort((a, b) => b.engagement - a.engagement || a.accuracy - b.accuracy)
+      .slice(0, 5);
+    const skipped = [...candidates]
+      .filter(r => r.engagement <= 5)
+      .sort((a, b) => b.accuracy - a.accuracy || a.engagement - b.engagement)
+      .slice(0, 5);
+    return { candidates, struggling, skipped };
+  }, [rows]);
 
   const exportCsv = () => {
     const cols = [
@@ -94,6 +192,49 @@ export default function AdminDashboard({ onBack }: Props) {
     const csv = lines.join("\n");
     navigator.clipboard?.writeText(csv).then(
       () => alert(`Copied ${rows.length} rows of student data (CSV) to clipboard.`),
+      () => alert("Could not access clipboard."),
+    );
+  };
+
+  const exportTopicCsv = () => {
+    const cols = ["username", "school", "age", "joined_at", "topic", "seen", "correct", "accuracy", "mastery_level_avg", "recent_accuracy"];
+    const esc = (v) => {
+      const s = v == null ? "" : String(v);
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const masteryAvg = (dist) => {
+      if (!dist || !dist.length) return "";
+      const total = dist.reduce((s, c) => s + c, 0);
+      if (!total) return "";
+      const sum = dist.reduce((s, c, i) => s + c * i, 0);
+      return (sum / total).toFixed(2);
+    };
+    const lines = [cols.join(",")];
+    for (const r of rows) {
+      const d = r.details;
+      if (!d) continue;
+      for (const t of d.topicAccuracy ?? []) {
+        const recent = d.perTopicRecent && d.perTopicRecent[t.topic];
+        const recentAcc = recent && recent.seen ? recent.correct / recent.seen : 0;
+        const row = {
+          username: r.username,
+          school: r.school,
+          age: r.age,
+          joined_at: r.joined_at,
+          topic: t.topic,
+          seen: t.seen,
+          correct: t.correct,
+          accuracy: t.seen ? (t.correct / t.seen).toFixed(4) : "0",
+          mastery_level_avg: masteryAvg(d.masteryDistribution),
+          recent_accuracy: recentAcc.toFixed(4),
+        };
+        lines.push(cols.map(c => esc(row[c])).join(","));
+      }
+    }
+    const csv = lines.join("\n");
+    const rowCount = lines.length - 1;
+    navigator.clipboard?.writeText(csv).then(
+      () => alert(`Copied ${rowCount} topic-level rows (one per student x topic) to clipboard.`),
       () => alert("Could not access clipboard."),
     );
   };
@@ -182,11 +323,127 @@ export default function AdminDashboard({ onBack }: Props) {
             </Card>
           )}
 
+
+          {/* Cohort comparison */}
+          <Card title="Cohort comparison" subtitle="Filter students by school or age group">
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              <CohortChip active={cohortKey === 'all'} onClick={() => setCohortKey('all')}>All ({rows.length})</CohortChip>
+              {schoolList.map(s => (
+                <CohortChip key={s} active={cohortKey === s} onClick={() => setCohortKey(s)}>{s}</CohortChip>
+              ))}
+              {(["15-16y", "17-18y"] as const).map(b => (
+                <CohortChip key={b} active={cohortKey === b} onClick={() => setCohortKey(b)}>{b}</CohortChip>
+              ))}
+            </div>
+            {cohortAgg.n === 0 ? (
+              <Notice icon={<AlertTriangle size={14} />} tone="slate" text="No students in this cohort." />
+            ) : (
+              <div className="grid grid-cols-3 gap-2">
+                <Mini label="n" value={String(cohortAgg.n)} sub="students" />
+                <Mini
+                  label="Avg accuracy"
+                  value={pct(cohortAgg.avgAccuracy)}
+                  sub={`${cohortAgg.n > 1 && agg.n > cohortAgg.n ? fmtDelta(cohortAgg.avgAccuracy - agg.avgAccuracy) : "—"} vs all`}
+                />
+                <Mini
+                  label="Avg LP"
+                  value={Math.round(cohortAgg.avgLP).toLocaleString()}
+                  sub={`${cohortAgg.n > 1 && agg.n > cohortAgg.n ? fmtDeltaPts(cohortAgg.avgLP - agg.avgLP) : "—"} vs all`}
+                />
+                <Mini
+                  label="Mastery %"
+                  value={pct(cohortAgg.avgMasteryPct)}
+                  sub={`${cohortAgg.n > 1 && agg.n > cohortAgg.n ? fmtDelta(cohortAgg.avgMasteryPct - agg.avgMasteryPct) : "—"} vs all`}
+                />
+                <Mini
+                  label="Active days"
+                  value={cohortAgg.avgActiveDays.toFixed(1)}
+                  sub={`${cohortAgg.n > 1 && agg.n > cohortAgg.n ? fmtDelta(cohortAgg.avgActiveDays - agg.avgActiveDays) : "—"} vs all`}
+                />
+              </div>
+            )}
+          </Card>
+
+          {/* Pre/post literacy gain */}
+          {prePost.length > 0 && (
+            <Card title="Pre/post literacy gain" subtitle="Earlier half vs recent half of attempts per topic">
+              <div className="flex flex-col gap-1.5">
+                {prePost.slice(0, 8).map(t => (
+                  <div key={t.topic} className="flex items-center gap-2">
+                    <span className="text-[11px] font-semibold w-24 shrink-0 truncate">{t.topic}</span>
+                    <div className="flex-1 flex flex-col gap-0.5">
+                      <div className="h-1.5 rounded-full bg-[var(--bg-main)] overflow-hidden flex">
+                        <div className="h-full bg-slate-500" style={{ width: `${t.earlyAcc * 100}%` }} />
+                      </div>
+                      <div className="h-2 rounded-full bg-[var(--bg-main)] overflow-hidden flex">
+                        <div className="h-full bg-violet-500" style={{ width: `${t.recentAcc * 100}%` }} />
+                      </div>
+                    </div>
+                    <span
+                      className="text-[10px] font-bold tabular-nums w-12 text-right shrink-0"
+                      style={{ color: t.lift >= 0 ? "#22C55E" : "#EF4444" }}
+                    >
+                      {t.lift >= 0 ? "+" : ""}{Math.round(t.lift * 100)}%
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <p className="text-[10px] text-[var(--text-muted)] mt-2">gray = early, violet = recent. Sorted by biggest gain first.</p>
+            </Card>
+          )}
+
+          {/* Engagement vs learning */}
+          <Card title="Engagement vs learning" subtitle="Where students are vs where they should be">
+            {engagementLists.candidates.length < 2 ? (
+              <Notice icon={<AlertTriangle size={14} />} tone="slate" text="Not enough engagement data yet." />
+            ) : (
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] mb-1.5 flex items-center gap-1">
+                    <TrendingDown size={11} className="text-red-500" /> High effort, low accuracy
+                  </p>
+                  <div className="flex flex-col gap-1.5">
+                    {engagementLists.struggling.length === 0 ? (
+                      <p className="text-[10px] text-[var(--text-muted)]">None in this cohort.</p>
+                    ) : engagementLists.struggling.map(s => (
+                      <div key={s.username} className="flex items-center gap-1.5">
+                        <span className="text-sm shrink-0">{s.avatar}</span>
+                        <span className="text-[11px] font-semibold truncate flex-1">{s.name}</span>
+                        <span className="text-[10px] font-bold tabular-nums shrink-0" style={{ color: s.accuracy < 0.5 ? "#EF4444" : s.accuracy < 0.75 ? "#F59E0B" : "#22C55E" }}>{pct(s.accuracy)}</span>
+                        <span className="text-[9px] text-[var(--text-muted)] tabular-nums shrink-0">·{s.engagement}q</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] mb-1.5 flex items-center gap-1">
+                    <Sparkles size={11} className="text-violet-500" /> Skipped despite mastery
+                  </p>
+                  <div className="flex flex-col gap-1.5">
+                    {engagementLists.skipped.length === 0 ? (
+                      <p className="text-[10px] text-[var(--text-muted)]">None in this cohort.</p>
+                    ) : engagementLists.skipped.map(s => (
+                      <div key={s.username} className="flex items-center gap-1.5">
+                        <span className="text-sm shrink-0">{s.avatar}</span>
+                        <span className="text-[11px] font-semibold truncate flex-1">{s.name}</span>
+                        <span className="text-[10px] font-bold tabular-nums shrink-0" style={{ color: s.accuracy < 0.5 ? "#EF4444" : s.accuracy < 0.75 ? "#F59E0B" : "#22C55E" }}>{pct(s.accuracy)}</span>
+                        <span className="text-[9px] text-[var(--text-muted)] tabular-nums shrink-0">·{s.engagement}q</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </Card>
+
           {/* Per-student list */}
           <div className="flex items-center justify-between mt-1">
             <h2 className="font-black text-sm uppercase tracking-widest text-[var(--text-muted)]">Students ({agg.n})</h2>
             <button onClick={exportCsv} className="flex items-center gap-1 text-xs font-bold text-violet-500 active:scale-95 transition-transform">
               <Download size={13} /> CSV
+            </button>
+            <button onClick={exportTopicCsv} className="flex items-center gap-1 text-xs font-bold text-violet-500 active:scale-95 transition-transform">
+              <Download size={13} /> Topic CSV
             </button>
           </div>
 
@@ -247,6 +504,100 @@ export default function AdminDashboard({ onBack }: Props) {
                               <KV k="Joined" v={r.joined_at ? new Date(r.joined_at).toLocaleDateString("en-SG", { month: "short", year: "numeric" }) : "—"} />
                             </div>
                             {r.email && <p className="text-[10px] text-[var(--text-muted)] mt-1">✉️ {r.email}</p>}
+                          </Sub>
+
+
+                          {/* Life simulator */}
+                          <Sub title="Life simulator">
+                            {((r.details.lifeRibbonsList?.length ?? 0) > 0 || (r.details.lifeRunState && Object.values(r.details.lifeRunState).some(v => v))) ? (
+                              <>
+                                {r.details.lifeRibbonsList && r.details.lifeRibbonsList.length > 0 && (
+                                  <div className="flex flex-wrap gap-1.5 mb-2">
+                                    {r.details.lifeRibbonsList.map(rid => {
+                                      const def = RIBBONS.find(x => x.id === rid);
+                                      return (
+                                        <span key={rid} className="text-[10px] font-bold px-2 py-1 rounded-lg bg-violet-500/10 border border-violet-500/30 text-violet-500" title={def?.description ?? rid}>
+                                          {def?.emoji ?? "🎀"} {def?.name ?? rid}
+                                        </span>
+                                      );
+                                    })}
+                                  </div>
+                                )}
+                                {r.details.lifeRunState && (
+                                  <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[11px]">
+                                    <KV k="Invested before 25" v={r.details.lifeRunState.investedBefore25 ? "Yes" : "No"} />
+                                    <KV k="Ever in debt" v={r.details.lifeRunState.everInDebt ? "Yes" : "No"} />
+                                    <KV k="Has insurance" v={r.details.lifeRunState.hasInsurance ? "Yes" : "No"} />
+                                    <KV k="CPF maxed" v={r.details.lifeRunState.cpfMaxed ? "Yes" : "No"} />
+                                    <KV k="Asset classes" v={String(r.details.lifeRunState.assetClassesUsed?.length ?? 0)} />
+                                  </div>
+                                )}
+                              </>
+                            ) : (
+                              <p className="text-[10px] text-[var(--text-muted)]">Life sim not yet played.</p>
+                            )}
+                          </Sub>
+
+                          {/* Stock simulator */}
+                          <Sub title="Stock simulator">
+                            <div className="grid grid-cols-3 gap-1.5">
+                              <Mini label="Portfolio" value={`${Math.round(r.details.stockPortfolioValue ?? 0)}`} sub="value" />
+                              <Mini
+                                label="Net P&L"
+                                value={`${(r.details.stockNetPnL ?? 0) >= 0 ? "+" : "-"}${Math.round(Math.abs(r.details.stockNetPnL ?? 0))}`}
+                                sub={(r.details.stockNetPnL ?? 0) >= 0 ? "profit" : "loss"}
+                              />
+                              <Mini label="Cash" value={`${Math.round(r.details.stockCash ?? 0)}`} sub="on hand" />
+                            </div>
+                          </Sub>
+
+                          {/* Scam Spotter + Bao Tycoon */}
+                          {((r.details.scamSpotterRounds ?? 0) > 0 || (r.details.baoTycoonRounds ?? 0) > 0) && (
+                            <Sub title="Scam Spotter & Bao Tycoon">
+                              <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                  <p className="text-[9px] font-black uppercase tracking-widest text-[var(--text-muted)] mb-1">Scam Spotter</p>
+                                  {(r.details.scamSpotterRounds ?? 0) > 0 ? (
+                                    <div className="flex flex-col gap-0.5 text-[11px]">
+                                      <KV k="Lifetime" v={`${r.details.scamSpotterScore ?? 0}/${r.details.scamSpotterPlayed ?? 0}`} />
+                                      <KV k="Rounds" v={String(r.details.scamSpotterRounds ?? 0)} />
+                                      <KV k="Avg accuracy" v={pct((r.details.scamSpotterPlayed ?? 0) > 0 ? (r.details.scamSpotterScore ?? 0) / r.details.scamSpotterPlayed : 0)} />
+                                    </div>
+                                  ) : (
+                                    <p className="text-[10px] text-[var(--text-muted)]">Not played.</p>
+                                  )}
+                                </div>
+                                <div>
+                                  <p className="text-[9px] font-black uppercase tracking-widest text-[var(--text-muted)] mb-1">Bao Tycoon</p>
+                                  {(r.details.baoTycoonRounds ?? 0) > 0 ? (
+                                    <div className="flex flex-col gap-0.5 text-[11px]">
+                                      <KV k="Lifetime profit" v={`${(r.details.baoTycoonProfit ?? 0) >= 0 ? "+" : "-"}${Math.round(r.details.baoTycoonProfit ?? 0)}`} />
+                                      <KV k="Days played" v={String(r.details.baoTycoonDays ?? 0)} />
+                                      <KV k="Rounds" v={String(r.details.baoTycoonRounds ?? 0)} />
+                                    </div>
+                                  ) : (
+                                    <p className="text-[10px] text-[var(--text-muted)]">Not played.</p>
+                                  )}
+                                </div>
+                              </div>
+                            </Sub>
+                          )}
+
+                          {/* Wallet + engagement */}
+                          <Sub title="Wallet & engagement">
+                            <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[11px]">
+                              <KV k="Monthly budget" v={(r.details.monthlyBudget ?? 0) > 0 ? `${r.details.monthlyBudget}` : "—"} />
+                              <KV k="Weekly budget" v={(r.details.weeklyBudget ?? 0) > 0 ? `${r.details.weeklyBudget}` : "—"} />
+                              <KV
+                                k="Overspend"
+                                v={(r.details.monthlyBudget ?? 0) > 0
+                                  ? pct(r.details.walletExpense / r.details.monthlyBudget)
+                                  : "—"}
+                              />
+                              <KV k="Days active" v={String(r.details.daysActive ?? 0)} />
+                              <KV k="First active" v={r.details.firstActiveDate ?? "—"} />
+                              <KV k="Coins" v={String(r.details.coins ?? 0)} />
+                            </div>
                           </Sub>
 
                           {r.details.topCategories.length > 0 && (
@@ -317,6 +668,21 @@ function Sub({ title, children }: { title: string; children: React.ReactNode }) 
 
 function KV({ k, v }: { k: string; v: string }) {
   return <div className="flex justify-between gap-2"><span className="text-[var(--text-muted)] truncate">{k}</span><span className="font-bold shrink-0">{v}</span></div>;
+}
+
+function CohortChip({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`text-[10px] font-bold px-2.5 py-1 rounded-full border transition-all active:scale-95 ${
+        active
+          ? "bg-violet-500/15 border-violet-500/40 text-violet-500"
+          : "bg-[var(--bg-main)] border-[var(--border-color)] text-[var(--text-muted)]"
+      }`}
+    >
+      {children}
+    </button>
+  );
 }
 
 function Notice({ icon, text, tone }: { icon: React.ReactNode; text: string; tone: "amber" | "slate" }) {

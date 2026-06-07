@@ -240,4 +240,15 @@ export interface UserState {
   budgetStreakDays: number;                       // current consecutive on-budget days
   budgetLastCheckDate: string | null;
   budgetBossClaimedThisWeek: boolean;
+
+  // ───── RESEARCH CUMULATIVE STATS ─────
+  // Optional so old fingrow_v6 blobs hydrate unchanged. Surfaced to the admin
+  // research dashboard via ProgressDetails. Resetting these is fine — they
+  // are research-only metrics, never affect gameplay or LP.
+  scamSpotterCorrect?: number;
+  scamSpotterPlayed?: number;
+  scamSpotterRounds?: number;
+  baoTycoonProfit?: number;
+  baoTycoonDays?: number;
+  baoTycoonRounds?: number;
 }
