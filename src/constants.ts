@@ -776,6 +776,298 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     explanation: "Loans are 'amortised' — early payments are mostly interest because the outstanding balance is largest. Only later does more go to principal. Extra early repayments save a lot of interest.",
     difficulty: "hard",
   },
+  // ─── Round 2 (added Jun 2026 — 35 new questions for diversity) ───
+  // Compound Interest
+  {
+    id: "ci-08",
+    category: "Compound Interest",
+    question: "What is the 'Rule of 72' used to estimate?",
+    options: ["Years to double your money at a given interest rate", "Maximum loan tenure in Singapore", "Income tax bracket for high earners", "Number of credit cards you should own"],
+    correctAnswer: 0,
+    explanation: "Rule of 72: divide 72 by your annual interest rate to find roughly how many years it takes to double. 72 ÷ 6% = 12 years.",
+  },
+  {
+    id: "ci-09",
+    category: "Compound Interest",
+    question: "If you invest $1,000 at 5% for 30 years with compounding, roughly how much do you have?",
+    options: ["$1,500", "$2,500", "$4,300", "$10,000"],
+    correctAnswer: 2,
+    explanation: "$1,000 × (1.05)^30 ≈ $4,321. Compounding turns small consistent contributions into large sums over decades.",
+  },
+  {
+    id: "ci-10",
+    category: "Compound Interest",
+    question: "Which grows your money faster over 20 years?",
+    options: ["3% simple interest", "2% compounded annually", "5% compounded annually", "All grow at the same rate"],
+    correctAnswer: 2,
+    explanation: "5% compounded is roughly (1.05)^20 = 2.65x, vs 3% simple giving 1.6x. Compounding only beats simple at rates > 0% over multi-year periods.",
+  },
+  {
+    id: "ci-11",
+    category: "Compound Interest",
+    question: "What is the difference between APR and APY?",
+    options: ["Nothing — they are the same", "APY includes compounding; APR does not", "APR is for loans; APY is for savings", "APY is always higher than APR"],
+    correctAnswer: 1,
+    explanation: "APY (Annual Percentage Yield) reflects the actual return including compounding. APR (Annual Percentage Rate) is the nominal rate. APY is the truer number to compare.",
+  },
+  // Budgeting
+  {
+    id: "bg-11",
+    category: "Budgeting",
+    question: "The 50/30/20 rule says:",
+    options: ["50% needs, 30% wants, 20% savings/debt", "50% savings, 30% needs, 20% wants", "50% investments, 30% savings, 20% fun", "50% parents, 30% friends, 20% you"],
+    correctAnswer: 0,
+    explanation: "50% for needs (rent, food), 30% for wants (entertainment), 20% for savings or debt repayment. A classic starting framework.",
+  },
+  {
+    id: "bg-12",
+    category: "Budgeting",
+    question: "What is a 'sinking fund'?",
+    options: ["A loan that builds your credit score", "Money set aside regularly for a planned future expense", "A high-yield savings account", "A type of insurance"],
+    correctAnswer: 1,
+    explanation: "Sinking funds spread the cost of predictable big expenses (laptop, holiday) over many months so you don't need to borrow when the bill arrives.",
+  },
+  {
+    id: "bg-13",
+    category: "Budgeting",
+    question: "The 'envelope method' of budgeting means:",
+    options: ["Putting cash into labelled envelopes for each category", "Hiding your budget in envelopes at home", "Using only paper bills", "Paying everything in cash"],
+    correctAnswer: 0,
+    explanation: "Envelope budgeting: assign cash to envelopes per category (food, fun, transport). When the envelope is empty, you stop spending in that category. Forces discipline.",
+  },
+  {
+    id: "bg-14",
+    category: "Budgeting",
+    question: "What does 'paying yourself first' mean?",
+    options: ["Withdrawing cash from an ATM before bills", "Saving/investing a fixed amount before any other spending", "Negotiating your own salary", "Refusing to lend money to friends"],
+    correctAnswer: 1,
+    explanation: "Pay yourself first by automating a transfer to savings/investments on payday. What's left is what you can spend. Reverses the typical 'save what's left' pattern.",
+  },
+  // Credit & Debt
+  {
+    id: "cr-10",
+    category: "Credit & Debt",
+    question: "Paying only the minimum on a credit card balance:",
+    options: ["Builds your credit score fastest", "Can take decades to clear the debt and cost 2-3× the original", "Has no effect on total interest", "Is required by Singapore law"],
+    correctAnswer: 1,
+    explanation: "Minimum payments (often 1-3% of balance) barely cover the interest. A $1,000 balance at 25% APR can take 8+ years and cost $1,200+ in interest if you only pay the minimum.",
+  },
+  {
+    id: "cr-11",
+    category: "Credit & Debt",
+    question: "What is a 'payday loan'?",
+    options: ["An advance on your next paycheck, usually with very high fees", "A student loan for tuition", "A bonus from your employer", "A low-interest personal loan"],
+    correctAnswer: 0,
+    explanation: "Payday loans charge 1-2% per week (50-100%+ APR). They create a debt spiral: borrowers re-borrow to cover the previous loan. Avoid them entirely.",
+  },
+  {
+    id: "cr-12",
+    category: "Credit & Debt",
+    question: "BNPL (Buy Now, Pay Later) is risky primarily because:",
+    options: ["It always charges high interest", "Missing a payment can trigger retroactive interest and harm credit", "It is illegal in Singapore", "The merchant gets less money"],
+    correctAnswer: 1,
+    explanation: "BNPL plans (Atome, GrabPay Later) advertise 0% but charge retroactive interest (~25%) if you miss a payment, and missed payments can affect your credit report.",
+  },
+  {
+    id: "cr-13",
+    category: "Credit & Debt",
+    question: "Which debt should you usually pay off FIRST?",
+    options: ["The smallest balance (snowball)", "The one with the highest interest rate (avalanche)", "The newest one", "Whichever is least annoying"],
+    correctAnswer: 1,
+    explanation: "The avalanche method pays the highest-APR debt first (saves the most money). The snowball method pays the smallest first (faster visible wins). Both work — pick the one you'll stick with.",
+  },
+  // Saving
+  {
+    id: "sv-06",
+    category: "Saving",
+    question: "How large should an emergency fund ideally be?",
+    options: ["1 week of expenses", "1 month of expenses", "3-6 months of expenses", "$10,000 flat"],
+    correctAnswer: 2,
+    explanation: "3-6 months of essential expenses covers most job losses, medical surprises, or major repairs. Bigger if you have variable income; smaller if dual income.",
+  },
+  {
+    id: "sv-07",
+    category: "Saving",
+    question: "What is a high-yield savings account?",
+    options: ["A savings account with above-average interest rates (often with conditions)", "A checking account with no fees", "A credit card with cashback", "An investment fund"],
+    correctAnswer: 0,
+    explanation: "HYSAs in Singapore (e.g. OCBC 360, UOB One) offer 3-4% p.a. on the first $75k if you meet credit-card-salary-card criteria. Way better than the 0.05% default.",
+  },
+  {
+    id: "sv-08",
+    category: "Saving",
+    question: "What's a good reason to keep cash in a regular savings account (not invested)?",
+    options: ["To chase the highest possible returns", "For an emergency fund you may need within 1-2 years", "Because markets are scary", "To hide it from your parents"],
+    correctAnswer: 1,
+    explanation: "Money you might need in <2 years (emergency fund, house deposit, planned purchase) belongs in cash. Markets can drop 30%+ in a year — bad timing with invested emergency funds.",
+  },
+  // Investing
+  {
+    id: "iv-10",
+    category: "Investing",
+    question: "'Time in the market' beats 'timing the market' because:",
+    options: ["Stocks always go up", "Missing the 10 best days in 20 years can halve your returns", "Day traders are bad at math", "ETFs are illegal to time-trade"],
+    correctAnswer: 1,
+    explanation: "A 2003 study showed missing the 10 best days in 20 years turned a $10k investment into $5k vs $40k for buy-and-hold. The best days cluster around the worst days — you can't time both.",
+  },
+  {
+    id: "iv-11",
+    category: "Investing",
+    question: "An index fund is best described as:",
+    options: ["A fund that picks stocks by AI", "A fund that tracks a broad market index (e.g. S&P 500)", "A fund with a single hot stock", "A government bond"],
+    correctAnswer: 1,
+    explanation: "Index funds buy all (or a representative sample) of stocks in an index. Low fees (~0.1-0.3% p.a.) and historically outperform ~85% of actively managed funds over 15 years.",
+  },
+  {
+    id: "iv-12",
+    category: "Investing",
+    question: "Diversification reduces:",
+    options: ["Expected returns", "Specific (idiosyncratic) risk of any one investment", "The need to research", "Taxes on gains"],
+    correctAnswer: 1,
+    explanation: "Spreading money across many investments reduces the impact of any single one failing. It doesn't eliminate market-wide risk (e.g. 2008), but it prevents one bad stock from wiping you out.",
+  },
+  // Inflation
+  {
+    id: "in-04",
+    category: "Inflation",
+    question: "If inflation is 3% and your savings earn 1%, your real return is:",
+    options: ["4% (1% + 3%)", "2% (3% - 1%)", "-2% (1% - 3%)", "0% (inflation cancels out anything)"],
+    correctAnswer: 2,
+    explanation: "Real return ≈ nominal return − inflation. 1% - 3% = -2%. Your money is losing 2% of its purchasing power per year. This is why cash alone is risky long-term.",
+  },
+  {
+    id: "in-05",
+    category: "Inflation",
+    question: "$100 today vs $100 ten years ago — which buys more?",
+    options: ["The same amount", "Today's $100 buys more", "Ten years ago's $100 buys more", "It depends on the country"],
+    correctAnswer: 1,
+    explanation: "Inflation erodes purchasing power. $100 ten years ago bought significantly more groceries/rent. Invested money needs to outpace inflation to grow in real terms.",
+  },
+  {
+    id: "in-06",
+    category: "Inflation",
+    question: "Which of these is NOT usually a sign of inflation?",
+    options: ["Falling purchasing power", "Rising prices broadly", "Central bank raising interest rates", "Stock prices hitting all-time highs while earnings stay flat"],
+    correctAnswer: 3,
+    explanation: "Stock ATHs alone aren't inflation. The other three ARE inflation signals. Stock ATHs can mean earnings growth (good) or speculation (caution).",
+  },
+  // Taxes
+  {
+    id: "tx-08",
+    category: "Taxes",
+    question: "In Singapore, the top personal income tax rate is:",
+    options: ["10%", "17%", "22%", "30%"],
+    correctAnswer: 2,
+    explanation: "Singapore's progressive tax tops at 22% for residents earning above $320k (from YA2024). One of the lowest top rates globally. First $20k is 0%.",
+  },
+  {
+    id: "tx-09",
+    category: "Taxes",
+    question: "GST in Singapore is currently:",
+    options: ["5%", "8%", "9%", "12%"],
+    correctAnswer: 2,
+    explanation: "GST rose to 9% in Jan 2024. Plan to 10% by 2026 and 15% by 2030 (announced). Essential goods are GST-zero-rated (rice, public transport, etc.).",
+  },
+  {
+    id: "tx-10",
+    category: "Taxes",
+    question: "Capital gains from selling stocks you held for 2+ years in Singapore:",
+    options: ["Taxed at 22%", "Taxed at 17%", "Not taxed (no capital gains tax)", "Taxed at GST rate"],
+    correctAnswer: 2,
+    explanation: "Singapore has NO capital gains tax for individuals. Profits from selling stocks held personally are tax-free. (Day-trader classification can change this for frequent traders.)",
+  },
+  // Insurance
+  {
+    id: "is-05",
+    category: "Insurance",
+    question: "Term life vs whole life insurance — which is usually better for most people?",
+    options: ["Term — cheaper, pure protection, no investment fluff", "Whole — builds cash value", "Both are equally good", "Neither — invest the premiums instead"],
+    correctAnswer: 0,
+    explanation: "Term insurance: pay X for Y years of coverage. Whole life: pay 5-10× more for the same coverage plus a savings wrapper that underperforms index funds. For most people, term + invest the difference wins.",
+  },
+  {
+    id: "is-06",
+    category: "Insurance",
+    question: "What is an insurance 'deductible'?",
+    options: ["The monthly premium", "The amount you pay out-of-pocket before insurance kicks in", "The maximum coverage", "The type of insurance"],
+    correctAnswer: 1,
+    explanation: "Deductible = the part YOU pay before insurance pays. A $500 deductible on car insurance means the first $500 of any claim is yours. Higher deductible = lower premium but more risk per incident.",
+  },
+  {
+    id: "is-07",
+    category: "Insurance",
+    question: "Health insurance riders (e.g. private hospital upgrades) are best described as:",
+    options: ["Mandatory add-ons", "Optional upgrades that increase premiums significantly", "Free benefits", "Tax deductions"],
+    correctAnswer: 1,
+    explanation: "Riders upgrade your coverage (e.g. A-class wards, private hospitals) but double or triple your premium. Assess based on your risk tolerance and emergency fund — not always worth it.",
+  },
+  // Scams & Fraud
+  {
+    id: "sc-06",
+    category: "Scams & Fraud",
+    question: "You receive a text claiming to be from DBS asking you to 'verify' your account by clicking a link. You should:",
+    options: ["Click the link to be safe", "Forward to DBS at 7777 and delete the text", "Reply with your account number", "Call the number in the text"],
+    correctAnswer: 1,
+    explanation: "Banks NEVER ask for credentials by SMS link. Forward scam texts to 7777 (ScamShield). When in doubt, call the bank's official number (on the back of your card), not the one in the text.",
+  },
+  {
+    id: "sc-07",
+    category: "Scams & Fraud",
+    question: "A 'job offer' requires you to pay $200 for 'training materials' upfront. This is:",
+    options: ["A normal hiring practice", "Always a scam — legitimate employers never charge to hire you", "Refundable after 3 months", "A government fee"],
+    correctAnswer: 1,
+    explanation: "Legitimate jobs never ask employees to pay. Common variants: 'evaluation fees', 'training kits', 'software licences'. The 'job' is the scam — there is no job.",
+  },
+  {
+    id: "sc-08",
+    category: "Scams & Fraud",
+    question: "An online romantic partner you've never met in person asks for $5,000 to help with a 'medical emergency'. The best response is:",
+    options: ["Send it — they need help", "Refuse and cut contact — this is a classic romance scam pattern", "Send half to test", "Ask them to video call first"],
+    correctAnswer: 1,
+    explanation: "Romance scams cost victims $23M+ in Singapore in 2023. The pattern: online-only relationship, urgent need, request for money. Never met + never sent money = safe. The moment you send, the demands escalate.",
+  },
+  // CPF
+  {
+    id: "cpf-05",
+    category: "CPF",
+    question: "Your CPF Ordinary Account (OA) earns:",
+    options: ["0.05% per year", "2.5% per year", "4.0% per year", "Variable, market-linked"],
+    correctAnswer: 1,
+    explanation: "OA earns 2.5% p.a. (risk-free, government-guaranteed). For comparison, a HYSA gives 3-4% but isn't locked. Use OA for housing/education where the concession beats the opportunity cost.",
+  },
+  {
+    id: "cpf-06",
+    category: "CPF",
+    question: "At age 55, what happens to your CPF savings?",
+    options: ["You can withdraw all of it tax-free", "You create a Retirement Account (RA) up to the Full Retirement Sum, the rest is withdrawable", "The government takes it all", "It converts to a stock portfolio"],
+    correctAnswer: 1,
+    explanation: "At 55, you set aside the FRS (Full Retirement Sum, ~$205k from 2024) into a RA earning 4% p.a. Anything above is withdrawable. The RA pays monthly payouts from 65.",
+  },
+  {
+    id: "cpf-07",
+    category: "CPF",
+    question: "CPF contributions for a 25-year-old earning $5,000/mo (employee + employer totals):",
+    options: ["0% — CPF is optional", "37% ($1,850/mo)", "20% ($1,000/mo)", "50% ($2,500/mo)"],
+    correctAnswer: 1,
+    explanation: "Total CPF = 37% for ages 23-55 (20% employee + 17% employer). Split 23% to OA, 6% to SA, 8% to MA. A big forced savings — often the biggest asset young Singaporeans have.",
+  },
+  // Banking
+  {
+    id: "bk-03",
+    category: "Banking",
+    question: "The best use of a high-yield savings account (e.g. OCBC 360) is for:",
+    options: ["Long-term investments (10+ years)", "Your emergency fund and short-term savings", "Stock trading", "Mortgage payments"],
+    correctAnswer: 1,
+    explanation: "HYSAs are perfect for cash you might need within 1-3 years. For long-term goals, index funds beat them. The interest rate usually has monthly conditions (salary crediting, card spend, etc.).",
+  },
+  {
+    id: "bk-04",
+    category: "Banking",
+    question: "You exchange $1,000 USD to SGD at the airport money changer. What should you check?",
+    options: ["The exchange rate and any commission/fee", "The colour of the notes", "Whether they accept credit cards", "Nothing — money changers are always fair"],
+    correctAnswer: 0,
+    explanation: "Airport money changers often have 3-5% worse rates than bank rates. Compare to the mid-market rate on Google. For larger amounts, a multi-currency account or bank transfer is much cheaper.",
+  },
 ];
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -907,57 +1199,67 @@ export const SHOP_ITEMS: ShopItem[] = [
 
 // ════════════════════════════════════════════════════════════════════════════
 // LEAGUE — League of Legends style rank ladder
-// 10 tiers, with divisions IV → I for Iron through Diamond.
-// Master, Grandmaster, Challenger have no divisions (apex ranks).
+// 11 tiers. Divisions IV → I for Iron through Diamond. Master → Sovereign
+// are apex ranks (no divisions). Sovereign is the new top tier (added 2026).
 // ════════════════════════════════════════════════════════════════════════════
 
-/** Master threshold and above (no divisions). */
-const APEX_THRESHOLDS: Record<"master" | "grandmaster" | "challenger", number> = {
-  master:       30000,
-  grandmaster:  50000,
-  challenger:   100000,
+/** Apex thresholds (no divisions). */
+const APEX_THRESHOLDS: Record<"master" | "grandmaster" | "challenger" | "sovereign", number> = {
+  master:       55000,
+  grandmaster:  90000,
+  challenger:   140000,
+  sovereign:    200000,
 };
 
-/** Per-tier ladder for Iron → Diamond. 4 divisions each. */
+/** Per-tier ladder for Iron → Diamond. 4 divisions each, evenly spaced
+ *  across the gap from the previous tier's start. */
 const DIVISION_LADDER: { tier: LeagueTier; division: LeagueDivision; threshold: number }[] = [
+  // Iron (0 → 500 bronze, 4 divisions across 500 gap)
   { tier: "iron",     division: "IV",  threshold: 0      },
-  { tier: "iron",     division: "III", threshold: 50     },
-  { tier: "iron",     division: "II",  threshold: 100    },
-  { tier: "iron",     division: "I",   threshold: 200    },
+  { tier: "iron",     division: "III", threshold: 125    },
+  { tier: "iron",     division: "II",  threshold: 250    },
+  { tier: "iron",     division: "I",   threshold: 375    },
 
-  { tier: "bronze",   division: "IV",  threshold: 350    },
-  { tier: "bronze",   division: "III", threshold: 500    },
-  { tier: "bronze",   division: "II",  threshold: 700    },
-  { tier: "bronze",   division: "I",   threshold: 900    },
+  // Bronze (500 → 1500 silver, 4 divisions across 1000 gap)
+  { tier: "bronze",   division: "IV",  threshold: 500    },
+  { tier: "bronze",   division: "III", threshold: 750    },
+  { tier: "bronze",   division: "II",  threshold: 1000   },
+  { tier: "bronze",   division: "I",   threshold: 1250   },
 
-  { tier: "silver",   division: "IV",  threshold: 1200   },
-  { tier: "silver",   division: "III", threshold: 1500   },
-  { tier: "silver",   division: "II",  threshold: 1800   },
-  { tier: "silver",   division: "I",   threshold: 2200   },
+  // Silver (1500 → 4000 gold, 4 divisions across 2500 gap)
+  { tier: "silver",   division: "IV",  threshold: 1500   },
+  { tier: "silver",   division: "III", threshold: 2125   },
+  { tier: "silver",   division: "II",  threshold: 2750   },
+  { tier: "silver",   division: "I",   threshold: 3375   },
 
-  { tier: "gold",     division: "IV",  threshold: 2700   },
-  { tier: "gold",     division: "III", threshold: 3200   },
-  { tier: "gold",     division: "II",  threshold: 3800   },
-  { tier: "gold",     division: "I",   threshold: 4500   },
+  // Gold (4000 → 8000 platinum, 4 divisions across 4000 gap)
+  { tier: "gold",     division: "IV",  threshold: 4000   },
+  { tier: "gold",     division: "III", threshold: 5000   },
+  { tier: "gold",     division: "II",  threshold: 6000   },
+  { tier: "gold",     division: "I",   threshold: 7000   },
 
-  { tier: "platinum", division: "IV",  threshold: 5500   },
-  { tier: "platinum", division: "III", threshold: 6500   },
-  { tier: "platinum", division: "II",  threshold: 7700   },
-  { tier: "platinum", division: "I",   threshold: 9000   },
+  // Platinum (8000 → 15000 emerald, 4 divisions across 7000 gap)
+  { tier: "platinum", division: "IV",  threshold: 8000   },
+  { tier: "platinum", division: "III", threshold: 9750   },
+  { tier: "platinum", division: "II",  threshold: 11500  },
+  { tier: "platinum", division: "I",   threshold: 13250  },
 
-  { tier: "emerald",  division: "IV",  threshold: 10500  },
-  { tier: "emerald",  division: "III", threshold: 12000  },
-  { tier: "emerald",  division: "II",  threshold: 13700  },
-  { tier: "emerald",  division: "I",   threshold: 15500  },
+  // Emerald (15000 → 30000 diamond, 4 divisions across 15000 gap)
+  { tier: "emerald",  division: "IV",  threshold: 15000  },
+  { tier: "emerald",  division: "III", threshold: 18750  },
+  { tier: "emerald",  division: "II",  threshold: 22500  },
+  { tier: "emerald",  division: "I",   threshold: 26250  },
 
-  { tier: "diamond",  division: "IV",  threshold: 17500  },
-  { tier: "diamond",  division: "III", threshold: 20000  },
-  { tier: "diamond",  division: "II",  threshold: 23000  },
-  { tier: "diamond",  division: "I",   threshold: 26500  },
+  // Diamond (30000 → 55000 master, 4 divisions across 25000 gap)
+  { tier: "diamond",  division: "IV",  threshold: 30000  },
+  { tier: "diamond",  division: "III", threshold: 36250  },
+  { tier: "diamond",  division: "II",  threshold: 42500  },
+  { tier: "diamond",  division: "I",   threshold: 48750  },
 
   { tier: "master",      division: null, threshold: APEX_THRESHOLDS.master       },
   { tier: "grandmaster", division: null, threshold: APEX_THRESHOLDS.grandmaster  },
   { tier: "challenger",  division: null, threshold: APEX_THRESHOLDS.challenger   },
+  { tier: "sovereign",   division: null, threshold: APEX_THRESHOLDS.sovereign    },
 ];
 
 /** Get the user's full rank (tier + division) from their total points. */
@@ -983,42 +1285,61 @@ export function getRank(points: number): RankInfo {
 /** Threshold for the start of each tier (used in compact summaries). */
 export const TIER_THRESHOLDS: Record<LeagueTier, number> = {
   iron:        0,
-  bronze:      350,
-  silver:      1200,
-  gold:        2700,
-  platinum:    5500,
-  emerald:     10500,
-  diamond:     17500,
+  bronze:      500,
+  silver:      1500,
+  gold:        4000,
+  platinum:    8000,
+  emerald:     15000,
+  diamond:     30000,
   master:      APEX_THRESHOLDS.master,
   grandmaster: APEX_THRESHOLDS.grandmaster,
   challenger:  APEX_THRESHOLDS.challenger,
+  sovereign:   APEX_THRESHOLDS.sovereign,
+};
+
+/** Per-tier tagline shown on the rank-up promotion modal. */
+export const TIER_TAGLINES: Record<LeagueTier, string> = {
+  iron:        "Every legend starts here.",
+  bronze:      "Bronze by name, not by effort.",
+  silver:      "Shining brighter than before.",
+  gold:        "Golden instincts, golden returns.",
+  platinum:    "Premium thinking, premium results.",
+  emerald:     "Growth is the new rich.",
+  diamond:     "Pressure makes diamonds.",
+  master:      "Mastery is a habit.",
+  grandmaster: "The 1% club.",
+  challenger:  "Top of the food chain.",
+  sovereign:   "The apex of finance.",
 };
 
 export interface TierConfigItem {
   label: string;
-  icon: string;       // emoji
+  icon: string;       // emoji (used in compact contexts; full UI uses <RankCrest/>)
   color: string;      // hex
   gradient: [string, string]; // [from, to] for cards
   next?: LeagueTier;
   hasDivisions: boolean;
+  /** Numeric tier weight — used to seed game randomness, sort cohorts, etc. */
+  weight: number;
 }
 
 export const TIER_CONFIG: Record<LeagueTier, TierConfigItem> = {
-  iron:        { label: "Iron",        icon: "⚙️",  color: "#5C5C5C", gradient: ["#5C5C5C", "#2A2A2A"], next: "bronze",      hasDivisions: true  },
-  bronze:      { label: "Bronze",      icon: "🥉",  color: "#CD7F32", gradient: ["#CD7F32", "#8B4513"], next: "silver",      hasDivisions: true  },
-  silver:      { label: "Silver",      icon: "🥈",  color: "#C0C0C0", gradient: ["#E5E7EB", "#9CA3AF"], next: "gold",        hasDivisions: true  },
-  gold:        { label: "Gold",        icon: "🥇",  color: "#FFD700", gradient: ["#FCD34D", "#D97706"], next: "platinum",    hasDivisions: true  },
-  platinum:    { label: "Platinum",    icon: "💎",  color: "#5CD7C6", gradient: ["#5EEAD4", "#0D9488"], next: "emerald",     hasDivisions: true  },
-  emerald:     { label: "Emerald",     icon: "🟢",  color: "#10B981", gradient: ["#34D399", "#065F46"], next: "diamond",     hasDivisions: true  },
-  diamond:     { label: "Diamond",     icon: "💠",  color: "#60A5FA", gradient: ["#93C5FD", "#1D4ED8"], next: "master",      hasDivisions: true  },
-  master:      { label: "Master",      icon: "🔮",  color: "#C084FC", gradient: ["#D8B4FE", "#7E22CE"], next: "grandmaster", hasDivisions: false },
-  grandmaster: { label: "Grandmaster", icon: "👑",  color: "#EF4444", gradient: ["#FCA5A5", "#991B1B"], next: "challenger",  hasDivisions: false },
-  challenger:  { label: "Challenger",  icon: "🏆",  color: "#FBBF24", gradient: ["#FEF3C7", "#F59E0B"],                       hasDivisions: false },
+  iron:        { label: "Iron",        icon: "⚙️",  color: "#8B8B8B", gradient: ["#8B8B8B", "#3F3F46"], next: "bronze",      hasDivisions: true,  weight: 1  },
+  bronze:      { label: "Bronze",      icon: "🥉",  color: "#D97706", gradient: ["#FB923C", "#9A3412"], next: "silver",      hasDivisions: true,  weight: 2  },
+  silver:      { label: "Silver",      icon: "🥈",  color: "#94A3B8", gradient: ["#E2E8F0", "#64748B"], next: "gold",        hasDivisions: true,  weight: 3  },
+  gold:        { label: "Gold",        icon: "🥇",  color: "#F59E0B", gradient: ["#FCD34D", "#B45309"], next: "platinum",    hasDivisions: true,  weight: 4  },
+  platinum:    { label: "Platinum",    icon: "💠",  color: "#22D3EE", gradient: ["#67E8F9", "#0E7490"], next: "emerald",     hasDivisions: true,  weight: 5  },
+  emerald:     { label: "Emerald",     icon: "🟢",  color: "#10B981", gradient: ["#34D399", "#065F46"], next: "diamond",     hasDivisions: true,  weight: 6  },
+  diamond:     { label: "Diamond",     icon: "💎",  color: "#60A5FA", gradient: ["#93C5FD", "#1D4ED8"], next: "master",      hasDivisions: true,  weight: 7  },
+  master:      { label: "Master",      icon: "🔮",  color: "#A855F7", gradient: ["#D8B4FE", "#6B21A8"], next: "grandmaster", hasDivisions: false, weight: 8  },
+  grandmaster: { label: "Grandmaster", icon: "👑",  color: "#DC2626", gradient: ["#FCA5A5", "#7F1D1D"], next: "challenger",  hasDivisions: false, weight: 9  },
+  challenger:  { label: "Challenger",  icon: "🏆",  color: "#F59E0B", gradient: ["#FEF3C7", "#B45309"], next: "sovereign",   hasDivisions: false, weight: 10 },
+  sovereign:   { label: "Sovereign",   icon: "👑",  color: "#FBBF24", gradient: ["#FDE68A", "#92400E"],                       hasDivisions: false, weight: 11 },
 };
 
 export const ALL_TIERS: LeagueTier[] = [
   "iron", "bronze", "silver", "gold", "platinum",
-  "emerald", "diamond", "master", "grandmaster", "challenger",
+  "emerald", "diamond", "master", "grandmaster", "challenger", "sovereign",
 ];
 
 /** Format a rank for display: "Gold II", "Master", etc. */
@@ -1102,7 +1423,89 @@ export const LP_REWARDS = {
   // Budget Streak
   BUDGET_DAILY: 15,
   BUDGET_BOSS: 150,
+  // Debt Dash minigame
+  DEBT_DASH_CORRECT: 15,        // +15 LP per correct swipe (8 scenarios => up to 120 LP/round)
 };
+
+// ════════════════════════════════════════════════════════════════════════════
+// DEBT DASH — SG-flavoured financial decisions (swipe-style minigame)
+// ════════════════════════════════════════════════════════════════════════════
+
+export interface DebtDashScenario {
+  id: string;
+  prompt: string;              // the setup line ("You're choosing between…")
+  optionA: string;             // the "smart" / cheaper long-term option
+  optionB: string;             // the "splurge" / more expensive option
+  correct: "A" | "B";          // A is always the financially sounder choice
+  lesson: string;              // one-line takeaway shown on the result screen
+}
+
+export const DEBT_DASH_SCENARIOS: DebtDashScenario[] = [
+  {
+    id: "dd-01",
+    prompt: "Your phone plan ends. The carrier offers a flashy upgrade:",
+    optionA: "Keep the current plan and invest the $40/mo savings at 5% returns",
+    optionB: "Upgrade to the new plan for $40/mo more over 24 months",
+    correct: "A",
+    lesson: "At 5% annual return, $40/mo invested becomes ~$12,800 in 20 years. Lifestyle creep on subscriptions is one of the biggest wealth-killers.",
+  },
+  {
+    id: "dd-02",
+    prompt: "Your laptop dies. You have $1,200 saved:",
+    optionA: "Buy a reliable refurbished model for $700, save $500",
+    optionB: "Charge the full $1,200 to your credit card for a new one",
+    correct: "A",
+    lesson: "Refurbished tech often has the same warranty. Saving the difference builds your emergency fund instead of paying 25%+ credit-card interest.",
+  },
+  {
+    id: "dd-03",
+    prompt: "A friend invites you to a $120 brunch this weekend:",
+    optionA: "Suggest a $15 hawker meet-up instead and split the savings",
+    optionB: "Go along to keep up — it's a once-off",
+    correct: "A",
+    lesson: "$120/weekends add up to $6,240/year. Suggesting alternatives preserves the friendship AND the wallet. Real friends don't test your budget.",
+  },
+  {
+    id: "dd-04",
+    prompt: "You're considering a 0% BNPL plan for a $600 phone:",
+    optionA: "Pay $300 now, save the other $300 as a 'future-you' buffer",
+    optionB: "Take the BNPL — it's 0% interest after all",
+    correct: "A",
+    lesson: "BNPL is 0% only if you never miss a payment. Miss one and retroactive 25% interest kicks in. The 'free money' framing is the trap.",
+  },
+  {
+    id: "dd-05",
+    prompt: "A 'limited time' sale offers 40% off a $200 jacket:",
+    optionA: "Skip it — you don't need another jacket",
+    optionB: "Buy it because the discount is huge",
+    correct: "A",
+    lesson: "The original price is the real cost. 40% off something you didn't need is still 100% waste. Sales exploit urgency, not value.",
+  },
+  {
+    id: "dd-06",
+    prompt: "Your car's road tax + insurance is due: $1,800",
+    optionA: "Pay from your emergency fund, replenish over 3 months",
+    optionB: "Take a 12-month loan at 6% to spread the cost",
+    correct: "A",
+    lesson: "Insurance and road tax are predictable annual costs — the emergency fund's job. Loans for predictable expenses just add interest on top of the bill.",
+  },
+  {
+    id: "dd-07",
+    prompt: "You want a gym membership to get fit:",
+    optionA: "Try ActiveSG's $2.50/day pass for a month first",
+    optionB: "Sign a 24-month contract at $99/mo for the 'discount'",
+    correct: "A",
+    lesson: "Test the habit before paying for it. Most people use a gym 4× per month max — ActiveSG's pay-per-use model wins on flexibility AND cost.",
+  },
+  {
+    id: "dd-08",
+    prompt: "You're tempted by a $500 'investment course' on Instagram:",
+    optionA: "Skip it — invest that $500 in a low-cost index fund instead",
+    optionB: "Pay it because the testimonials look legit",
+    correct: "A",
+    lesson: "If the course teacher was making real money from investing, they wouldn't need to sell courses. The $500 in an index fund earns 7%/year forever.",
+  },
+];
 
 // ════════════════════════════════════════════════════════════════════════════
 // MASTERY HELPERS (LP #2)

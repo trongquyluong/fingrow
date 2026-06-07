@@ -1,6 +1,6 @@
 import { Home, Gamepad2, GraduationCap, Trophy, Wallet } from "lucide-react";
 
-export type NavTab = "dashboard" | "games" | "stocks" | "wallet" | "quiz" | "league" | "life" | "shop" | "scam_spotter" | "bao_tycoon" | "trophies" | "admin";
+export type NavTab = "dashboard" | "games" | "stocks" | "wallet" | "quiz" | "league" | "life" | "shop" | "scam_spotter" | "bao_tycoon" | "debt_dash" | "trophies" | "admin";
 
 interface BottomNavProps {
   activeTab: NavTab;
@@ -11,7 +11,7 @@ export default function BottomNav({ activeTab, setActiveTab }: BottomNavProps) {
   const tabs: { id: NavTab; icon: any; label: string; matches?: NavTab[] }[] = [
     { id: "dashboard", icon: Home,          label: "Home",   matches: ["dashboard", "trophies"] },
     { id: "wallet",    icon: Wallet,        label: "Wallet" },
-    { id: "games",     icon: Gamepad2,      label: "Games",  matches: ["games", "stocks", "life", "scam_spotter", "bao_tycoon"] },
+    { id: "games",     icon: Gamepad2,      label: "Games",  matches: ["games", "stocks", "life", "scam_spotter", "bao_tycoon", "debt_dash"] },
     { id: "quiz",      icon: GraduationCap, label: "Learn"  },
     { id: "league",    icon: Trophy,        label: "League" },
   ];
