@@ -81,22 +81,43 @@ export async function syncScore(payload: {
 export async function fetchWeeklyLeaderboard(weekStart: string, limit = 20): Promise<LeaderboardRow[]> {
   const sb = supabase();
   if (!sb) return [];
-  const { data, error } = await sb
-    .from("leaderboard")
-    .select("*")
-    .or(`week_start.eq.${weekStart},updated_at.gte.${new Date(Date.now() - 14 * 86400_000).toISOString()}`)
-    .order("week_points", { ascending: false })
-    .limit(limit);
+  const [{ data, error }, { data: acctData }] = await Promise.all([
+    sb
+      .from("leaderboard")
+      .select("*")
+      .or(`week_start.eq.${weekStart},updated_at.gte.${new Date(Date.now() - 14 * 86400_000).toISOString()}`)
+      .order("week_points", { ascending: false })
+      .limit(limit),
+    sb.from("accounts").select("username, username_display, avatar"),
+  ]);
   if (error) {
     console.error("fetchWeeklyLeaderboard", error);
     return [];
   }
-  // Filter out guests (no registered account) so only students appear on the leaderboard.
-  const { data: acctData } = await sb
-    .from("accounts")
-    .select("username");
-  const registered = new Set((acctData ?? []).map((a: AccountRow) => a.username.toLowerCase()));
-  return ((data ?? []) as LeaderboardRow[]).filter(r => registered.has(r.username.toLowerCase()));
+  // Show only registered students (hide guests). Also synthesise a 0-LP row
+  // for any registered account that hasn't synced a leaderboard row yet, so
+  // brand-new accounts show up at the bottom of the ladder from day one
+  // instead of being invisible until they earn their first LP.
+  const rows = ((data ?? []) as LeaderboardRow[]);
+  const seen = new Set(rows.map(r => r.username.toLowerCase()));
+  const synthetic: LeaderboardRow[] = [];
+  for (const a of (acctData ?? []) as Pick<AccountRow, "username" | "username_display" | "avatar">[]) {
+    if (seen.has(a.username.toLowerCase())) continue;
+    if (isAdminUsername(a.username)) continue;
+    synthetic.push({
+      user_id: `synthetic:${a.username}`,
+      username: a.username_display,
+      avatar: a.avatar,
+      total_points: 0,
+      week_points: 0,
+      tier: "iron",
+      week_start: weekStart,
+      updated_at: new Date(0).toISOString(),
+    });
+  }
+  return [...rows, ...synthetic]
+    .sort((a, b) => b.week_points - a.week_points)
+    .slice(0, limit);
 }
 
 // ─── Accounts (cross-device login) ─────────────────────────────────────────
