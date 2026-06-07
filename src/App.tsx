@@ -433,6 +433,14 @@ export default function App() {
  weekStart: state.leagueWeekStart,
  });
  }
+ // Bootstrap account_state row for users with no cloud copy yet. The
+ // progressTimer effect only saves when state deps change, so a brand-new
+ // account that registers and never earns XP/LP would never get a cloud
+ // copy. Without this, a fresh-browser login has nothing to restore.
+ if (!cancelled && !isAdmin && SUPABASE_ENABLED) {
+ const at = await saveAccountState(uname.trim().toLowerCase(), state);
+ if (at) writeSyncMarker({ username: uname.trim().toLowerCase(), at });
+    }
     })();
     return () => { cancelled = true; };
     // `state` is intentionally read at hydrate time (snapshot) and not a trigger.
