@@ -120,16 +120,25 @@ export default function LeagueTab({
 
   useEffect(() => { loadLeaderboard(); }, [leagueWeekStart, leagueWeekPoints]);
 
-  const myRowInList = leaderboard.find(r => r.user_id === myUserId);
+  // The player is identified by username (case-insensitive) since the same
+  // account on different devices has different anonymous user_ids. Match by
+  // username so the local 'you' row doesn't get duplicated by a cloud row
+  // from another device for the same account.
+  const meUsername = (account?.username ?? '').trim().toLowerCase();
+  const myRowInList = meUsername
+    ? leaderboard.find(r => r.username.toLowerCase() === meUsername)
+    : leaderboard.find(r => r.user_id === myUserId);
   const allCompetitors: { id: string; name: string; avatar: string; weekPoints: number; isMe: boolean }[] = [
     ...(myRowInList ? [] : [{ id: myUserId, name: myName, avatar: myAvatar, weekPoints: leagueWeekPoints, isMe: true }]),
-    ...leaderboard.map(r => ({
-      id: r.user_id,
-      name: r.username,
-      avatar: r.avatar,
-      weekPoints: r.week_points,
-      isMe: r.user_id === myUserId,
-    })),
+    ...leaderboard
+      .filter(r => !meUsername || r.username.toLowerCase() !== meUsername)
+      .map(r => ({
+        id: r.user_id,
+        name: r.username,
+        avatar: r.avatar,
+        weekPoints: r.week_points,
+        isMe: r.user_id === myUserId,
+      })),
   ].sort((a, b) => b.weekPoints - a.weekPoints);
 
   return (
